@@ -175,11 +175,12 @@ const config = {
     "db"
   ],
   "activeProvider": "mongodb",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "mongodb+srv://joshardals:ri5bxveI51Xe9SVA@cluster0.mq1w0cp.mongodb.net/client_invoice_app?retryWrites=true&w=majority&appName=Cluster0"
+        "value": null
       }
     }
   },

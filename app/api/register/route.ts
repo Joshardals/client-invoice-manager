@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 
 import { resend } from "@/lib/resend";
 import { generateVerificationCode } from "@/lib/utils";
+import { sendVerificationMail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
@@ -48,20 +49,22 @@ export async function POST(req: Request) {
     });
 
     // Send the verification code to the user's email using Resend
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Verify your email",
-      html: `
-        <h2>Welcome!</h2>
-        <p>Please verify your email address by entering this code:</p>
-        <h3 style="font-size: 24px; letter-spacing: 2px; background: #f4f4f4; padding: 10px; display: inline-block;">${verificationCode}</h3>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you didn't create an account, please ignore this email.</p>
-      `,
-    });
 
-    // return NextResponse.json({ message: "User registered", user });
+    // await resend.emails.send({
+    //   from: "onboarding@resend.dev",
+    //   to: email,
+    //   subject: "Verify your email",
+    //   html: `
+    //     <h2>Welcome!</h2>
+    //     <p>Please verify your email address by entering this code:</p>
+    //     <h3 style="font-size: 24px; letter-spacing: 2px; background: #f4f4f4; padding: 10px; display: inline-block;">${verificationCode}</h3>
+    //     <p>This code will expire in 10 minutes.</p>
+    //     <p>If you didn't create an account, please ignore this email.</p>
+    //   `,
+    // });
+
+    await sendVerificationMail(email, verificationCode);
+
     return NextResponse.json({
       message: "Verification code sent",
       userId: user.id, // Only send non-sensitive data back

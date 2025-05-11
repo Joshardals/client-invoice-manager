@@ -7,7 +7,7 @@ import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 import { formatTime } from "@/lib/utils";
 
-export function VerifyEmailForm() {
+export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,9 +21,6 @@ export function VerifyEmailForm() {
     type: "success" | "error" | "info" | "loading" | null;
     message: string;
   }>({ type: null, message: "" });
-
-  const searchParams = useSearchParams();
-  const sessionToken = searchParams.get("session");
 
   // Verify session and get user email on mount
   useEffect(() => {

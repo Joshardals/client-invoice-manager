@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: { session?: string };
+  searchParams: Promise<{ session?: string }>;
 }) {
   const { session } = await searchParams;
   if (!session) {
@@ -14,10 +14,7 @@ export default async function VerifyEmailPage({
   }
 
   try {
-    const decoded = verify(
-      session,
-      process.env.NEXTAUTH_SECRET!
-    ) as {
+    const decoded = verify(session, process.env.NEXTAUTH_SECRET!) as {
       userId: string;
       email: string;
     };
@@ -37,7 +34,7 @@ export default async function VerifyEmailPage({
       redirect("/login");
     }
 
-    return <VerifyEmailForm />;
+    return <VerifyEmailForm sessionToken={session} />;
   } catch (error) {
     redirect("/register");
   }

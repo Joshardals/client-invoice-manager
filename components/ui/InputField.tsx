@@ -37,7 +37,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               disabled={disabled}
               className="absolute bg-red-500 right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={30} /> : <Eye size={30} />}
             </button>
           )}
         </div>

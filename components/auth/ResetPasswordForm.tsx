@@ -14,9 +14,6 @@ interface ResetPasswordFormData {
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
-  // const searchParams = useSearchParams();
-  // const token = searchParams.get("token");
-
   const [status, setStatus] = useState<{
     type: "success" | "error" | "loading" | null;
     message: string;

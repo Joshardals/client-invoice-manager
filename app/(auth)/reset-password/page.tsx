@@ -14,30 +14,30 @@ export default async function ResetPasswordPage({
     redirect("/forgot-password");
   }
 
-  // try {
-  //   const decoded = verify(token, process.env.NEXTAUTH_SECRET!) as {
-  //     userId: string;
-  //     type: string;
-  //   };
+  try {
+    const decoded = verify(token, process.env.NEXTAUTH_SECRET!) as {
+      userId: string;
+      type: string;
+    };
 
-  //   if (decoded.type !== "password_reset") {
-  //     redirect("/forgot-password");
-  //   }
+    if (decoded.type !== "password_reset") {
+      redirect("/forgot-password");
+    }
 
-  //   const resetToken = await prisma.passwordReset.findFirst({
-  //     where: {
-  //       token,
-  //       used: false,
-  //       expires: { gt: new Date() },
-  //     },
-  //   });
+    const resetToken = await prisma.passwordReset.findFirst({
+      where: {
+        token,
+        used: false,
+        expires: { gt: new Date() },
+      },
+    });
 
-  //   if (!resetToken) {
-  //     redirect("/forgot-password");
-  //   }
-  // } catch (err) {
-  //   redirect("/forgot-password");
-  // }
+    if (!resetToken) {
+      redirect("/forgot-password");
+    }
 
-  return <ResetPasswordForm token={token} />;
+    return <ResetPasswordForm token={token} />;
+  } catch (err) {
+    redirect("/forgot-password");
+  }
 }

@@ -22,6 +22,7 @@ export function LoginForm() {
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
+    mode: "onChange", // 👈 real-time validation
     defaultValues: {
       email: "",
       password: "",
@@ -44,7 +45,7 @@ export function LoginForm() {
       } else {
         router.push("/dashboard");
       }
-    } catch (err) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);

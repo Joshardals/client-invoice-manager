@@ -17,6 +17,7 @@ export function RegisterForm() {
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<RegisterFormData>({
+    mode: "onChange", // 👈 real-time validation
     defaultValues: {
       name: "",
       email: "",
@@ -68,6 +69,10 @@ export function RegisterForm() {
             disabled={loading}
             {...register("name", {
               required: "Name is required",
+              pattern: {
+                value: /^[a-zA-Z\s]+$/,
+                message: "Only letters and spaces allowed",
+              },
               minLength: {
                 value: 2,
                 message: "Name must be at least 2 characters",
@@ -94,11 +99,17 @@ export function RegisterForm() {
             label="Password"
             type="password"
             disabled={loading}
+            hintText="Must be at least 8 characters"
             {...register("password", {
               required: "Password is required",
               minLength: {
                 value: 8,
                 message: "Password must be at least 8 characters",
+              },
+              pattern: {
+                value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/,
+                message:
+                  "Include at least 1 letter, 1 number, and 1 special character",
               },
             })}
             error={errors.password?.message}

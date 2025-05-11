@@ -3,6 +3,7 @@ export interface InputFieldProps
   label: string;
   name: string;
   error?: string;
+  hintText?: string;
 }
 
 export interface RegisterFormData {

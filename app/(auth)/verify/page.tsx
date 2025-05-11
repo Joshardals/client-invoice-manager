@@ -14,7 +14,10 @@ export default async function VerifyEmailPage({
   }
 
   try {
-    const decoded = verify(session, process.env.NEXTAUTH_SECRET!) as {
+    const decoded = verify(
+      session,
+      process.env.NEXTAUTH_SECRET!
+    ) as {
       userId: string;
       email: string;
     };

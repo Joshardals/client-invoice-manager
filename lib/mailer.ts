@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationMail = async (to: string, code: string) => {
+export async function sendVerificationMail(to: string, code: string) {
   const info = await transporter.sendMail({
     from: `${SMTP_USER}`,
     to,
@@ -27,4 +27,20 @@ export const sendVerificationMail = async (to: string, code: string) => {
   });
 
   console.log("Message sent: %s", info.messageId);
-};
+}
+
+export async function sendPasswordResetMail(to: string, resetUrl: string) {
+  const info = await transporter.sendMail({
+    from: `${SMTP_USER}`,
+    to,
+    subject: "Password Reset Request",
+    html: `
+      <h2>Password Reset Request</h2>
+      <p>We received a request to reset your password. Click the link below to reset it:</p>
+      <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+      <p>If you didn't request this, please ignore this email.</p>
+    `,
+  });
+
+  console.log("Message sent: %s", info.messageId);
+}

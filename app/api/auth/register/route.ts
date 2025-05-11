@@ -2,8 +2,8 @@ import { addMinutes } from "date-fns";
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sign } from "jsonwebtoken";
 
-import { resend } from "@/lib/resend";
 import { generateVerificationCode } from "@/lib/utils";
 import { sendVerificationMail } from "@/lib/mailer";
 
@@ -39,6 +39,13 @@ export async function POST(req: Request) {
     // Generate a 6-digit verification code
     const verificationCode = generateVerificationCode();
 
+    // Create a verification session token
+    const verificationSessionToken = sign(
+      { userId: user.id, email },
+      process.env.NEXTAUTH_SECRET!,
+      { expiresIn: "10m" }
+    );
+
     // Store the verification code and it's expiration time in the database
     await prisma.verificationToken.create({
       data: {
@@ -67,7 +74,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       message: "Verification code sent",
-      userId: user.id, // Only send non-sensitive data back
+      verificationSessionToken,
     });
   } catch (err) {
     console.error("Register Error:", err);

@@ -4,6 +4,10 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
 import { SessionStrategy } from "next-auth";
+import { sign } from "jsonwebtoken";
+import { sendVerificationMail } from "./mailer";
+import { addMinutes } from "date-fns";
+import { generateVerificationCode } from "./utils";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -23,16 +27,42 @@ export const authOptions: NextAuthOptions = {
 
         if (!user || !user.password) return null;
 
-        // ✅ Email not verified check
-        if (!user.emailVerified) {
-          throw new Error("Please verify your email before logging in.");
-        }
-
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
+
         if (!isValid) return null;
+
+        // ✅ Email not verified check
+        if (!user.emailVerified) {
+          // Create a new verification session token
+          const verificationSessionToken = sign(
+            { userId: user.id, email: user.email },
+            process.env.NEXTAUTH_SECRET!,
+            { expiresIn: "10m" }
+          );
+
+          // Delete any existing verification tokens for this user
+          await prisma.verificationToken.deleteMany({
+            where: { userId: user.id },
+          });
+
+          // Generate and save new verification code
+          const newVerificationCode = generateVerificationCode();
+          await prisma.verificationToken.create({
+            data: {
+              token: newVerificationCode,
+              userId: user.id,
+              expires: addMinutes(new Date(), 10),
+            },
+          });
+
+          // Send new verification code
+          await sendVerificationMail(user.email, newVerificationCode);
+
+          throw new Error(`unverified:${verificationSessionToken}`);
+        }
 
         return user;
       },

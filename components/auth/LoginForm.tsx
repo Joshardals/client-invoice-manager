@@ -22,12 +22,21 @@ export function LoginForm() {
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
-    mode: "onChange", // 👈 real-time validation
+    mode: "onChange",
     defaultValues: {
       email: "",
       password: "",
     },
   });
+
+  const getErrorMessage = (error: string) => {
+    const errorMessages: { [key: string]: string } = {
+      CredentialsSignin: "Invalid email or password. Please try again.",
+      Default: "An error occurred. Please try again.",
+    };
+
+    return errorMessages[error] || errorMessages.Default;
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -41,11 +50,18 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        // Check if it's an unverified error
+        if (result.error.startsWith("unverified:")) {
+          const sessionToken = result.error.split(":")[1];
+          router.push(`/verify?session=${sessionToken}`);
+          return;
+        }
+        // Convert the error code to a user-friendly message
+        setError(getErrorMessage(result.error));
       } else {
         router.push("/dashboard");
       }
-    } catch {
+    } catch (err) {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -108,6 +124,7 @@ export function LoginForm() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               className="p-3 rounded-lg bg-red-50 text-red-700 text-sm"
             >
               {error}
@@ -133,3 +150,5 @@ export function LoginForm() {
     </div>
   );
 }
+
+export default LoginForm;

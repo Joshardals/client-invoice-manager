@@ -30,14 +30,17 @@ export function RegisterForm() {
       setLoading(true);
       setError("");
 
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
+      const responseData = await res.json();
+
       if (res.ok) {
-        router.push("/verify");
+        // Redirect with the verification session token
+        router.push(`/verify?session=${responseData.verificationSessionToken}`);
       } else {
         const responseData = await res.json();
         setError(responseData.error || "Something went wrong");
@@ -119,6 +122,7 @@ export function RegisterForm() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               className="p-3 rounded-lg bg-red-50 text-red-700 text-sm"
             >
               {error}

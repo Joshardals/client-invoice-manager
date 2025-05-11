@@ -3,37 +3,41 @@ import prisma from "@/lib/prisma";
 import { verify } from "jsonwebtoken";
 import { redirect } from "next/navigation";
 
-interface PageProps {
-  searchParams: {
-    token?: string;
-  };
+interface Props {
+  searchParams: { token?: string };
 }
 
-export default async function ResetPasswordPage({ searchParams }: PageProps) {
-  const { token } = searchParams;
+export default async function ResetPasswordPage({ searchParams }: Props) {
+  const { token } = await searchParams;
 
   if (!token) {
     redirect("/forgot-password");
   }
 
   try {
-    // Check if token exists and hasn't been used
+    const decoded = verify(token, process.env.NEXTAUTH_SECRET!) as {
+      userId: string;
+      type: string;
+    };
+
+    if (decoded.type !== "password_reset") {
+      redirect("/forgot-password");
+    }
+
     const resetToken = await prisma.passwordReset.findFirst({
       where: {
         token,
         used: false,
-        expires: {
-          gt: new Date(),
-        },
+        expires: { gt: new Date() },
       },
     });
 
     if (!resetToken) {
       redirect("/forgot-password");
     }
-  } catch (error) {
+
+    return <ResetPasswordForm token={token} />;
+  } catch (err) {
     redirect("/forgot-password");
   }
-
-  return <ResetPasswordForm />;
 }

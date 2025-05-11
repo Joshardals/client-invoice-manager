@@ -2,20 +2,14 @@ import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
-interface SearchParams {
-  token?: string;
-}
-
-interface PageProps {
-  searchParams: SearchParams | Promise<SearchParams>;
-}
+type PageProps = {
+  searchParams: {
+    token?: string;
+  };
+};
 
 export default async function ResetPasswordPage({ searchParams }: PageProps) {
-  // Await the searchParams if it's a Promise
-  const params = await (searchParams instanceof Promise
-    ? searchParams
-    : Promise.resolve(searchParams));
-  const { token } = params;
+  const { token } = searchParams;
 
   if (!token) {
     redirect("/forgot-password");

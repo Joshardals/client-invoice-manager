@@ -1,12 +1,13 @@
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import prisma from "@/lib/prisma";
+import { verify } from "jsonwebtoken";
 import { redirect } from "next/navigation";
 
-type PageProps = {
+interface PageProps {
   searchParams: {
     token?: string;
   };
-};
+}
 
 export default async function ResetPasswordPage({ searchParams }: PageProps) {
   const { token } = searchParams;

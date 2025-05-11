@@ -3,12 +3,13 @@ import prisma from "@/lib/prisma";
 import { verify } from "jsonwebtoken";
 import { redirect } from "next/navigation";
 
-interface Props {
+// Define the Props type to match the expected PageProps
+type Props = {
   searchParams: { token?: string };
-}
+};
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
-  const { token } = await searchParams;
+  const { token } = searchParams;
 
   if (!token) {
     redirect("/forgot-password");

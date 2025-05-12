@@ -1,91 +1,107 @@
 "use client";
-import { useState, FormEvent, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import React, {
+  useState,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useTransition,
+} from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, AlertCircle } from "lucide-react";
-import InputField from "../ui/InputField";
-import Button from "../ui/Button";
 import { formatTime } from "@/lib/utils";
+import { useVerificationTimer } from "@/lib/hooks/useVerificationTimer";
+import { useResendCooldown } from "@/lib/hooks/useResendCooldown";
+import { Status, VerificationData } from "@/typings";
+import { formAnimations, statusAnimations } from "@/lib/constants";
+import Button from "../ui/Button";
+import InputField from "../ui/InputField";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
-export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
+interface VerifyEmailFormProps {
+  sessionToken: string;
+  initialData: VerificationData;
+}
+
+export function VerifyEmailForm({
+  sessionToken,
+  initialData,
+}: VerifyEmailFormProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const [timer, setTimer] = useState(600); // 10 minutes
-  const [canResend, setCanResend] = useState(false);
-  const [resendTimer, setResendTimer] = useState(60); // 1 minute cooldown
-  const [userEmail, setUserEmail] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>(initialData.email);
+  const [status, setStatus] = useState<Status>({ type: null, message: "" });
 
-  const [status, setStatus] = useState<{
-    type: "success" | "error" | "info" | "loading" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  const { timeRemaining, startTimer, isExpired } = useVerificationTimer(
+    initialData.verificationExpires
+  );
+  const { cooldownTime, canResend, startCooldown } = useResendCooldown(60);
 
-  // Verify session and get user email on mount
-  useEffect(() => {
-    const verifySession = async () => {
-      if (!sessionToken) {
-        router.replace("/register");
-        return;
-      }
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-      try {
-        const res = await fetch("/api/auth/verify-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionToken }),
-        });
-
-        if (!res.ok) {
-          setStatus({
-            type: "error",
-            message: "Invalid session. Redirecting to registration...",
-          });
-          setTimeout(() => router.replace("/register"), 2000);
-          return;
-        }
-
-        const data = await res.json();
-        setUserEmail(data.email);
-      } catch (error) {
-        setStatus({
-          type: "error",
-          message: "Failed to verify session. Redirecting to registration...",
-        });
-        setTimeout(() => router.replace("/register"), 2000);
-      }
-    };
-
-    verifySession();
-  }, [sessionToken, router]);
-
-  // Timer effects remain the same...
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
+  const cleanup = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   }, []);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (!canResend) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            return 60;
-          }
-          return prev - 1;
+  const handleRedirect = useCallback(
+    (path: string, delay: number = 0) => {
+      const timeoutId = setTimeout(() => {
+        startTransition(() => {
+          router.replace(path);
         });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [canResend]);
+      }, delay);
+      return () => clearTimeout(timeoutId);
+    },
+    [router]
+  );
 
-  const handleResendCode = async () => {
+  const verifySession = useCallback(async () => {
+    if (!sessionToken) {
+      handleRedirect("/register");
+      return;
+    }
+
+    cleanup();
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const res = await fetch("/api/auth/verify-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionToken }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!res.ok) {
+        throw new Error("Invalid session");
+      }
+
+      const data = await res.json();
+      setUserEmail(data.email);
+      startTimer(data.verificationExpires);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+
+      setStatus({
+        type: "error",
+        message: "Session verification failed. Redirecting to registration...",
+      });
+      handleRedirect("/register", 2000);
+    }
+  }, [sessionToken, handleRedirect, cleanup, startTimer]);
+
+  const handleResendCode = useCallback(async () => {
     if (!sessionToken || !canResend) return;
+
+    cleanup();
+    abortControllerRef.current = new AbortController();
 
     try {
       setResendLoading(true);
@@ -98,84 +114,104 @@ export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionToken }),
+        signal: abortControllerRef.current.signal,
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setCanResend(false);
-        setTimer(600);
-        setResendTimer(60);
+        startTimer(data.verificationExpires);
+        startCooldown();
         setCode("");
         setStatus({
           type: "info",
           message: "New verification code sent to your email",
         });
       } else {
-        if (response.status === 401) {
-          setStatus({
-            type: "error",
-            message: "Your session has expired. Please register again.",
-          });
-          setTimeout(() => router.replace("/register"), 2000);
-        } else {
-          setStatus({
-            type: "error",
-            message: data.error || "Failed to resend code",
-          });
-        }
+        throw new Error(data.error || "Failed to resend code");
       }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+
       setStatus({
         type: "error",
-        message: "Failed to resend code. Please try again.",
+        message:
+          error instanceof Error ? error.message : "Failed to resend code",
       });
     } finally {
       setResendLoading(false);
     }
-  };
+  }, [sessionToken, canResend, cleanup, startTimer, startCooldown]);
 
-  const handleVerify = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus({ type: "loading", message: "Verifying code..." });
+  const handleVerify = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    try {
-      const response = await fetch("/api/auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, sessionToken }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setStatus({
-          type: "success",
-          message: "Email verified successfully! Redirecting to login...",
-        });
-        setTimeout(() => router.push("/login"), 3000);
-      } else {
+      if (isExpired) {
         setStatus({
           type: "error",
-          message: data.error || "Invalid verification code",
+          message: "Verification code has expired. Please request a new one.",
         });
+        return;
       }
-    } catch (error) {
-      setStatus({
-        type: "error",
-        message: "Network error. Please try again.",
-      });
-    } finally {
-      setLoading(false);
+
+      cleanup();
+      abortControllerRef.current = new AbortController();
+
+      try {
+        setLoading(true);
+        setStatus({
+          type: "loading",
+          message: "Verifying code...",
+        });
+
+        const response = await fetch("/api/auth/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, sessionToken }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setStatus({
+            type: "success",
+            message: "Email verified successfully! Redirecting to login...",
+          });
+          handleRedirect("/login", 3000);
+        } else {
+          throw new Error(data.error || "Invalid verification code");
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+
+        setStatus({
+          type: "error",
+          message:
+            error instanceof Error ? error.message : "Verification failed",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [code, sessionToken, cleanup, handleRedirect, isExpired]
+  );
+
+  useEffect(() => {
+    // Only verify session if we don't have initial data
+    if (!initialData.verificationExpires) {
+      verifySession();
     }
-  };
+    return cleanup;
+  }, [verifySession, cleanup, initialData.verificationExpires]);
+
+  const isLoading = loading || isPending;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <div>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...formAnimations}
         className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
       >
         <div className="space-y-2">
@@ -187,12 +223,12 @@ export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
               We sent a verification code to {userEmail}
             </p>
           )}
-          {timer > 0 && (
+          {timeRemaining > 0 && (
             <p className="text-sm text-gray-500">
-              Code expires in: {formatTime(timer)}
+              Code expires in: {formatTime(timeRemaining)}
             </p>
           )}
-          {timer === 0 && (
+          {isExpired && (
             <p className="text-sm text-red-500">
               Code has expired. Please request a new one.
             </p>
@@ -200,51 +236,55 @@ export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
         </div>
 
         <form onSubmit={handleVerify} className="space-y-6">
-          <InputField
-            label="Verification Code"
-            name="code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Enter 6-digit code"
-            maxLength={6}
-            disabled={loading || status.type === "success"}
-          />
+          <div className="space-y-2">
+            <InputField
+              label="Verification Code"
+              name="code"
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Enter 6-digit code"
+              maxLength={6}
+              disabled={isLoading || status.type === "success" || resendLoading}
+            />
+          </div>
 
-          {status.message && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`p-3 rounded-lg flex items-center ${
-                status.type === "success"
-                  ? "bg-green-50 text-green-700"
-                  : status.type === "error"
-                    ? "bg-red-50 text-red-700"
-                    : status.type === "info"
-                      ? "bg-blue-50 text-blue-700"
-                      : "bg-gray-50 text-gray-700"
-              } text-sm`}
-            >
-              {status.type === "success" && (
-                <CheckCircle className="w-4 h-4 mr-2" />
-              )}
-              {status.type === "error" && (
-                <AlertCircle className="w-4 h-4 mr-2" />
-              )}
-              {status.message}
-            </motion.div>
-          )}
+          <AnimatePresence mode="wait">
+            {status.message && (
+              <motion.div
+                {...statusAnimations}
+                className={`p-3 rounded-lg flex items-center ${
+                  status.type === "success"
+                    ? "bg-green-50 text-green-700"
+                    : status.type === "error"
+                      ? "bg-red-50 text-red-700"
+                      : status.type === "info"
+                        ? "bg-blue-50 text-blue-700"
+                        : "bg-gray-50 text-gray-700"
+                } text-sm`}
+              >
+                {status.type === "success" && (
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                )}
+                {status.type === "error" && (
+                  <AlertCircle className="w-4 h-4 mr-2" />
+                )}
+                {status.message}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="space-y-4">
             <Button
               type="submit"
               loading={loading}
               disabled={
-                loading ||
+                isLoading ||
                 status.type === "success" ||
                 code.length !== 6 ||
-                timer === 0
+                isExpired ||
+                resendLoading
               }
-              className="w-full"
             >
               Verify Email
             </Button>
@@ -252,16 +292,17 @@ export function VerifyEmailForm({ sessionToken }: { sessionToken: string }) {
             <button
               type="button"
               onClick={handleResendCode}
-              disabled={!canResend || resendLoading}
+              disabled={!canResend || resendLoading || isPending}
               className="w-full text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {canResend
                 ? "Resend Code"
-                : `Resend Code (${formatTime(resendTimer)})`}
+                : `Resend Code (${formatTime(cooldownTime)})`}
             </button>
           </div>
         </form>
       </motion.div>
+      <LoadingSpinner isPending={isPending} />
     </div>
   );
 }

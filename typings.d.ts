@@ -11,3 +11,15 @@ export interface RegisterFormData {
   email: string;
   password: string;
 }
+
+// Types for Forms
+export interface Status {
+  type: "success" | "error" | "info" | "loading" | null;
+  message: string;
+}
+
+// I used it in VerifyEmailForm and VerifyEmailPage
+export interface VerificationData {
+  email: string;
+  verificationExpires: string | null;
+}

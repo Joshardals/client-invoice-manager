@@ -5,28 +5,21 @@ import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
-
-// Types
-interface RegisterFormData {
-  name: string;
-  email: string;
-  password: string;
-}
+import { zodResolver } from "@hookform/resolvers/zod";
+import { RegisterFormData, registerSchema } from "@/lib/form/validation";
+import {
+  formAnimations,
+  MAX_RETRIES,
+  RETRY_DELAY,
+  statusAnimations,
+} from "@/lib/constants";
+import NavigationProgress from "../ui/NavigationProgress";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 interface ApiResponse {
   verificationSessionToken?: string;
   error?: string;
 }
-
-// Constants
-const PASSWORD_REQUIREMENTS = {
-  minLength: 8,
-  pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/,
-  message: "Include at least 1 letter, 1 number, and 1 special character",
-};
-
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 1000;
 
 export function RegisterForm() {
   const router = useRouter();
@@ -43,6 +36,7 @@ export function RegisterForm() {
     reset,
     watch,
   } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -87,8 +81,6 @@ export function RegisterForm() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // "X-CSRF-Token":
-            //   typeof window !== "undefined" ? getCsrfToken?.() : "",
           },
           credentials: "include",
           body: JSON.stringify(data),
@@ -102,8 +94,9 @@ export function RegisterForm() {
         }
 
         return responseData;
-      } catch (err: any) {
+      } catch (err) {
         if (
+          err instanceof Error &&
           retryCount < MAX_RETRIES &&
           (err instanceof TypeError || err.name === "AbortError")
         ) {
@@ -126,7 +119,13 @@ export function RegisterForm() {
         setLoading(true);
         setError("");
 
-        const responseData = await registerUser(data);
+        const sanitizedData = {
+          ...data,
+          email: data.email.toLowerCase().trim(),
+          name: data.name.trim(),
+        };
+
+        const responseData = await registerUser(sanitizedData);
 
         if (responseData.verificationSessionToken) {
           handleSuccess(responseData.verificationSessionToken);
@@ -163,10 +162,9 @@ export function RegisterForm() {
   const isLoading = loading || isPending;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...formAnimations}
         className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
       >
         <div className="space-y-2">
@@ -180,22 +178,14 @@ export function RegisterForm() {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
           noValidate
+          aria-label="Registration form"
         >
           <InputField
             label="Full Name"
             disabled={isLoading}
             autoComplete="name"
-            {...register("name", {
-              required: "Name is required",
-              pattern: {
-                value: /^[a-zA-Z\s]+$/,
-                message: "Only letters and spaces allowed",
-              },
-              minLength: {
-                value: 2,
-                message: "Name must be at least 2 characters",
-              },
-            })}
+            aria-required="true"
+            {...register("name")}
             error={errors.name?.message}
           />
 
@@ -204,13 +194,8 @@ export function RegisterForm() {
             type="email"
             disabled={isLoading}
             autoComplete="email"
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Please enter a valid email",
-              },
-            })}
+            aria-required="true"
+            {...register("email")}
             error={errors.email?.message}
           />
 
@@ -219,17 +204,8 @@ export function RegisterForm() {
             type="password"
             disabled={isLoading}
             autoComplete="new-password"
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: PASSWORD_REQUIREMENTS.minLength,
-                message: `Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters`,
-              },
-              pattern: {
-                value: PASSWORD_REQUIREMENTS.pattern,
-                message: PASSWORD_REQUIREMENTS.message,
-              },
-            })}
+            aria-required="true"
+            {...register("password")}
             error={errors.password?.message}
           />
 
@@ -237,9 +213,7 @@ export function RegisterForm() {
             {error && (
               <motion.div
                 key="error"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                {...statusAnimations}
                 className="p-3 rounded-lg bg-red-50 text-red-700 text-sm"
               >
                 {error}
@@ -253,11 +227,7 @@ export function RegisterForm() {
             disabled={!isValid || isLoading}
             className="w-full"
           >
-            {loading
-              ? "Creating Account..."
-              : isPending
-                ? "Redirecting..."
-                : "Create Account"}
+            Create Account
           </Button>
         </form>
 
@@ -272,26 +242,8 @@ export function RegisterForm() {
             Sign in
           </button>
         </p>
-
-        {/* Optional loading bar for navigation */}
-        <AnimatePresence>
-          {isPending && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed top-0 left-0 w-full h-1 bg-blue-500"
-            >
-              <motion.div
-                className="h-full bg-blue-600"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 1 }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
-    </div>
+      <LoadingSpinner isPending={isPending} />
+    </>
   );
 }

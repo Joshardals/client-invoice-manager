@@ -2,6 +2,7 @@ import { VerifyEmailForm } from "@/components/auth/VerifyEmailForm";
 import { verify } from "jsonwebtoken";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
+import { VerificationData } from "@/typings";
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -19,22 +20,40 @@ export default async function VerifyEmailPage({
       email: string;
     };
 
-    // Check if user exists and their verification status
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { emailVerified: true },
-    });
+    // Get user and verification data in one query
+    const [user, verificationToken] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: {
+          emailVerified: true,
+          email: true,
+        },
+      }),
+      prisma.verificationToken.findFirst({
+        where: {
+          userId: decoded.userId,
+          expires: { gt: new Date() },
+        },
+        orderBy: { expires: "desc" },
+        select: { expires: true },
+      }),
+    ]);
 
     if (!user) {
       redirect("/register");
     }
 
-    // If email is already verified, redirect to login
     if (user.emailVerified) {
       redirect("/login");
     }
 
-    return <VerifyEmailForm sessionToken={session} />;
+    const initialData: VerificationData = {
+      email: user.email,
+      verificationExpires: verificationToken?.expires.toISOString() || null,
+    };
+
+    // Pass initial data to client component
+    return <VerifyEmailForm sessionToken={session} initialData={initialData} />;
   } catch (error) {
     redirect("/register");
   }

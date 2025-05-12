@@ -6,63 +6,65 @@ export async function POST(req: Request) {
   try {
     const { code, sessionToken } = await req.json();
 
-    // Verify session token first
+    // Verify session token
     const decoded = verify(sessionToken, process.env.NEXTAUTH_SECRET!) as {
       userId: string;
       email: string;
-      exp?: number; // Optional expiration check
     };
 
-    // Find verification token
-    const verificationRecord = await prisma.verificationToken.findUnique({
-      where: {
-        token: code,
-        userId: decoded.userId, // Ensure the code belongs to this user
-      },
-    });
-
-    if (!verificationRecord) {
-      return NextResponse.json(
-        { error: "Invalid verification code" },
-        { status: 400 }
-      );
-    }
-
-    // Check if token has expired
-    if (verificationRecord.expires < new Date()) {
-      // Clean up expired token
-      await prisma.verificationToken.delete({
-        where: { token: code },
+    // Transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Find verification token
+      const verificationRecord = await tx.verificationToken.findFirst({
+        where: {
+          token: code,
+          userId: decoded.userId,
+          expires: { gt: new Date() },
+        },
       });
 
-      return NextResponse.json(
-        { error: "Verification code has expired" },
-        { status: 400 }
-      );
-    }
+      if (!verificationRecord) {
+        throw new Error("Invalid or expired verification code");
+      }
 
-    // Update user verification status
-    await prisma.user.update({
-      where: { id: verificationRecord.userId },
-      data: { emailVerified: new Date() },
+      // Update user verification status
+      await tx.user.update({
+        where: { id: decoded.userId },
+        data: { emailVerified: new Date() },
+      });
+
+      // Delete all verification tokens for this user
+      await tx.verificationToken.deleteMany({
+        where: { userId: decoded.userId },
+      });
+
+      return verificationRecord;
     });
-
-    // Delete all verification tokens for this user
-    await prisma.verificationToken.deleteMany({
-      where: { userId: decoded.userId },
-    });
-
-    // Set session token expiration to now
-    decoded.exp = Math.floor(Date.now() / 1000);
 
     return NextResponse.json({
       message: "Email verified successfully",
-      sessionExpired: true,
+      verificationExpires: result.expires.toISOString(),
     });
   } catch (error) {
     console.error("Verification Error:", error);
+
+    if (error instanceof Error) {
+      if (
+        error.name === "JsonWebTokenError" ||
+        error.name === "TokenExpiredError"
+      ) {
+        return NextResponse.json(
+          { error: "Invalid or expired session" },
+          { status: 401 }
+        );
+      }
+      if (error.message === "Invalid or expired verification code") {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+    }
+
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

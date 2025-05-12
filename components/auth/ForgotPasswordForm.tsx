@@ -1,76 +1,140 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { motion } from "framer-motion";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { zodResolver } from "@hookform/resolvers/zod";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
-
-interface ForgotPasswordFormData {
-  email: string;
-}
+import {
+  ForgotPasswordFormData,
+  forgotPasswordSchema,
+} from "@/lib/form/validation";
+import {
+  formAnimations,
+  MAX_RETRIES,
+  RETRY_DELAY,
+  statusAnimations,
+} from "@/lib/constants";
+import NavigationProgress from "../ui/NavigationProgress";
+import { Status } from "@/typings";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const [status, setStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  const [status, setStatus] = useState<Status>({
+    type: null as "success" | "error" | null,
+    message: "",
+  });
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const submitAttemptRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    reset,
   } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     mode: "onChange",
     defaultValues: {
       email: "",
     },
   });
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      setLoading(true);
-      setStatus({ type: null, message: "" });
+  const cleanup = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
-      const res = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  const requestPasswordReset = useCallback(
+    async (email: string, retryCount = 0) => {
+      cleanup();
+      abortControllerRef.current = new AbortController();
 
-      const responseData = await res.json();
+      try {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+          signal: abortControllerRef.current.signal,
+        });
 
-      if (res.ok) {
+        const data = await res.json();
+
+        if (!res.ok)
+          throw new Error(data.error || "Failed to send reset instructions");
+        return data;
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          retryCount < MAX_RETRIES &&
+          (err instanceof TypeError || err.name === "AbortError")
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          return requestPasswordReset(email, retryCount + 1);
+        }
+        throw err;
+      }
+    },
+    [cleanup]
+  );
+
+  const onSubmit = useCallback(
+    async (data: ForgotPasswordFormData) => {
+      if (submitAttemptRef.current) return;
+      submitAttemptRef.current = true;
+
+      try {
+        // Clear the error parameter from URL when submitting
+        startTransition(() => {
+          router.replace("/forgot-password");
+        });
+
+        setLoading(true);
+        setStatus({ type: null, message: "" });
+
+        await requestPasswordReset(data.email.toLowerCase().trim());
+
         setStatus({
           type: "success",
           message:
             "If an account exists with this email, you will receive password reset instructions.",
         });
-      } else {
+        reset();
+      } catch (err) {
+        console.error("Password reset error:", err);
         setStatus({
           type: "error",
           message:
-            responseData.error || "Something went wrong. Please try again.",
+            err instanceof Error
+              ? err.message
+              : "Network error. Please try again.",
         });
+      } finally {
+        submitAttemptRef.current = false;
+        setLoading(false);
       }
-    } catch (err) {
-      setStatus({
-        type: "error",
-        message: "Network error. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [requestPasswordReset, reset]
+  );
+
+  const handleLoginNavigation = useCallback(() => {
+    startTransition(() => {
+      router.push("/login");
+    });
+  }, [router]);
+
+  const isLoading = loading || isPending;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...formAnimations}
         className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
       >
         <div className="space-y-2">
@@ -81,55 +145,48 @@ export function ForgotPasswordForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+          noValidate
+        >
           <InputField
             label="Email Address"
             type="email"
-            disabled={loading}
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Please enter a valid email",
-              },
-            })}
+            disabled={isLoading}
+            {...register("email")}
             error={errors.email?.message}
           />
 
-          {status.message && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`p-3 rounded-lg ${
-                status.type === "success"
-                  ? "bg-green-50 text-green-700"
-                  : "bg-red-50 text-red-700"
-              } text-sm`}
-            >
-              {status.message}
-            </motion.div>
-          )}
+          <AnimatePresence mode="wait">
+            {status.message && (
+              <motion.div
+                {...statusAnimations}
+                className={`p-3 rounded-lg ${
+                  status.type === "success"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
+                } text-sm`}
+              >
+                {status.message}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="space-y-4">
             <Button
               type="submit"
-              loading={loading}
-              disabled={!isValid || loading}
+              loading={isLoading}
+              disabled={!isValid || isLoading}
               className="w-full"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Sending Instructions...
-                </>
-              ) : (
-                "Send Reset Instructions"
-              )}
+              Send Reset Instructions
             </Button>
 
             <button
               type="button"
-              onClick={() => router.push("/login")}
+              onClick={handleLoginNavigation}
+              disabled={isLoading}
               className="w-full text-sm text-gray-600 hover:text-gray-900"
             >
               Back to Login
@@ -137,6 +194,7 @@ export function ForgotPasswordForm() {
           </div>
         </form>
       </motion.div>
-    </div>
+      <LoadingSpinner isPending={isPending} />
+    </>
   );
 }

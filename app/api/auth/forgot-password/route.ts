@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma";
 import { sendPasswordResetMail } from "@/lib/mailer";
 // import { rateLimit } from "@/lib/rate-limit";
 
+// TODO: Figure out how to implement rate limiting
+
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
@@ -31,7 +33,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // Generate reset token
+    // First, invalidate all existing reset tokens for this user
+    await prisma.passwordReset.updateMany({
+      where: {
+        userId: user.id,
+        used: false,
+        expires: {
+          gt: new Date(),
+        },
+      },
+      data: {
+        used: true,
+      },
+    });
+
+    // Generate new reset token
     const resetToken = sign(
       { userId: user.id, type: "password_reset" },
       process.env.NEXTAUTH_SECRET!,

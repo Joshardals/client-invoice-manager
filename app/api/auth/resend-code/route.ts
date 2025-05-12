@@ -15,16 +15,20 @@ export async function POST(req: Request) {
       email: string;
     };
 
-    // Check if user exists and is still unverified
+    // Check if user exists and get current verification status
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check if the user is already verified
     if (user.emailVerified) {
       return NextResponse.json(
         { error: "Email is already verified" },
@@ -32,31 +36,59 @@ export async function POST(req: Request) {
       );
     }
 
-    // Delete any existing verification tokens for this user
-    await prisma.verificationToken.deleteMany({
-      where: { userId: user.id },
-    });
-
-    // Generate and save new verification code
-    const newVerificationCode = generateVerificationCode();
-    await prisma.verificationToken.create({
-      data: {
-        token: newVerificationCode,
+    // Check for rate limiting
+    const recentToken = await prisma.verificationToken.findFirst({
+      where: {
         userId: user.id,
-        expires: addMinutes(new Date(), 10),
+        createdAt: {
+          gt: new Date(),
+        },
       },
     });
 
-    // Send new verification code
-    await sendVerificationMail(user.email, newVerificationCode);
+    if (recentToken) {
+      return NextResponse.json(
+        { error: "Please wait before requesting a new code" },
+        { status: 429 }
+      );
+    }
+
+    // Transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Delete existing tokens
+      await tx.verificationToken.deleteMany({
+        where: { userId: user.id },
+      });
+
+      // Generate new verification token
+      const expires = addMinutes(new Date(), 10);
+      const newVerificationCode = generateVerificationCode();
+
+      const token = await tx.verificationToken.create({
+        data: {
+          token: newVerificationCode,
+          userId: user.id,
+          expires,
+          createdAt: new Date(),
+        },
+      });
+
+      // Send email
+      await sendVerificationMail(user.email, newVerificationCode);
+
+      return token;
+    });
 
     return NextResponse.json({
       message: "New verification code sent successfully",
+      verificationExpires: result.expires.toISOString(),
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Resend Code Error:", error);
+
     if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
+      error instanceof Error &&
+      (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError")
     ) {
       return NextResponse.json(
         { error: "Invalid or expired session" },
@@ -64,9 +96,8 @@ export async function POST(req: Request) {
       );
     }
 
-    console.error("Resend Code Error:", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

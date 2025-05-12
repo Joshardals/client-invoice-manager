@@ -1,24 +1,47 @@
 "use client";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useState, useCallback, useRef, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import InputField from "../ui/InputField";
-import type { RegisterFormData } from "@/typings";
 import Button from "../ui/Button";
+
+// Types
+interface RegisterFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface ApiResponse {
+  verificationSessionToken?: string;
+  error?: string;
+}
+
+// Constants
+const PASSWORD_REQUIREMENTS = {
+  minLength: 8,
+  pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/,
+  message: "Include at least 1 letter, 1 number, and 1 special character",
+};
+
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1000;
 
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [isPending, startTransition] = useTransition(); // 👈 For route transitions
-  const submitAttemptRef = useRef(false); // 👈 Prevent duplicate submissions
+  const [isPending, startTransition] = useTransition();
+  const submitAttemptRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    watch,
   } = useForm<RegisterFormData>({
     mode: "onChange",
     defaultValues: {
@@ -28,13 +51,21 @@ export function RegisterForm() {
     },
   });
 
-  // Memoized error handler
+  // Cleanup function for pending requests
+  const cleanup = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  // Error handler
   const handleError = useCallback((message: string) => {
     setError(message);
     setLoading(false);
   }, []);
 
-  // Memoized success handler
+  // Success handler
   const handleSuccess = useCallback(
     (token: string) => {
       reset();
@@ -45,32 +76,49 @@ export function RegisterForm() {
     [router, reset]
   );
 
-  // Memoized API call
-  const registerUser = useCallback(async (data: RegisterFormData) => {
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Add CSRF protection
-        // "X-CSRF-Token": getCsrfToken?.() || "",
-      },
-      credentials: "include", // Important for security
-      body: JSON.stringify(data),
-    });
+  // API call with retry logic
+  const registerUser = useCallback(
+    async (data: RegisterFormData, retryCount = 0): Promise<ApiResponse> => {
+      cleanup();
+      abortControllerRef.current = new AbortController();
 
-    const responseData = await res.json();
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // "X-CSRF-Token":
+            //   typeof window !== "undefined" ? getCsrfToken?.() : "",
+          },
+          credentials: "include",
+          body: JSON.stringify(data),
+          signal: abortControllerRef.current.signal,
+        });
 
-    if (!res.ok) {
-      throw new Error(responseData.error || "Registration failed");
-    }
+        const responseData: ApiResponse = await res.json();
 
-    return responseData;
-  }, []);
+        if (!res.ok) {
+          throw new Error(responseData.error || "Registration failed");
+        }
 
-  // Memoized submit handler with retry logic
+        return responseData;
+      } catch (err: any) {
+        if (
+          retryCount < MAX_RETRIES &&
+          (err instanceof TypeError || err.name === "AbortError")
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          return registerUser(data, retryCount + 1);
+        }
+        throw err;
+      }
+    },
+    [cleanup]
+  );
+
+  // Submit handler
   const onSubmit = useCallback(
     async (data: RegisterFormData) => {
-      // Prevent duplicate submissions
       if (submitAttemptRef.current) return;
       submitAttemptRef.current = true;
 
@@ -78,22 +126,13 @@ export function RegisterForm() {
         setLoading(true);
         setError("");
 
-        // Implement retry logic
-        const attempt = async (retries: number): Promise<any> => {
-          try {
-            return await registerUser(data);
-          } catch (err) {
-            if (retries > 0 && err instanceof TypeError) {
-              // Network error
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              return attempt(retries - 1);
-            }
-            throw err;
-          }
-        };
+        const responseData = await registerUser(data);
 
-        const responseData = await attempt(2); // Try up to 3 times
-        handleSuccess(responseData.verificationSessionToken);
+        if (responseData.verificationSessionToken) {
+          handleSuccess(responseData.verificationSessionToken);
+        } else {
+          throw new Error("Invalid server response");
+        }
       } catch (err) {
         console.error("Registration error:", err);
         handleError(
@@ -107,12 +146,21 @@ export function RegisterForm() {
     [registerUser, handleSuccess, handleError]
   );
 
-  // Memoized navigation handler
+  // Navigation handler
   const handleLoginNavigation = useCallback(() => {
     startTransition(() => {
       router.push("/login");
     });
   }, [router]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
+
+  const isLoading = loading || isPending;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
@@ -128,10 +176,15 @@ export function RegisterForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+          noValidate
+        >
           <InputField
             label="Full Name"
-            disabled={loading}
+            disabled={isLoading}
+            autoComplete="name"
             {...register("name", {
               required: "Name is required",
               pattern: {
@@ -149,7 +202,8 @@ export function RegisterForm() {
           <InputField
             label="Email Address"
             type="email"
-            disabled={loading}
+            disabled={isLoading}
+            autoComplete="email"
             {...register("email", {
               required: "Email is required",
               pattern: {
@@ -163,26 +217,26 @@ export function RegisterForm() {
           <InputField
             label="Password"
             type="password"
-            disabled={loading}
-            hintText="Must be at least 8 characters"
+            disabled={isLoading}
+            autoComplete="new-password"
             {...register("password", {
               required: "Password is required",
               minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
+                value: PASSWORD_REQUIREMENTS.minLength,
+                message: `Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters`,
               },
               pattern: {
-                value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/,
-                message:
-                  "Include at least 1 letter, 1 number, and 1 special character",
+                value: PASSWORD_REQUIREMENTS.pattern,
+                message: PASSWORD_REQUIREMENTS.message,
               },
             })}
             error={errors.password?.message}
           />
 
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {error && (
               <motion.div
+                key="error"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -192,8 +246,18 @@ export function RegisterForm() {
               </motion.div>
             )}
           </AnimatePresence>
-          <Button type="submit" loading={loading} disabled={!isValid}>
-            Create Account
+
+          <Button
+            type="submit"
+            loading={isLoading}
+            disabled={!isValid || isLoading}
+            className="w-full"
+          >
+            {loading
+              ? "Creating Account..."
+              : isPending
+                ? "Redirecting..."
+                : "Create Account"}
           </Button>
         </form>
 
@@ -202,11 +266,31 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={handleLoginNavigation}
-            className="font-medium text-blue-600 hover:text-blue-500"
+            disabled={isLoading}
+            className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Sign in
           </button>
         </p>
+
+        {/* Optional loading bar for navigation */}
+        <AnimatePresence>
+          {isPending && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-0 left-0 w-full h-1 bg-blue-500"
+            >
+              <motion.div
+                className="h-full bg-blue-600"
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 1 }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );

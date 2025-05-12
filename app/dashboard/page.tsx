@@ -1,4 +1,4 @@
-import SignOutButton from "@/components/auth/SignOutButton";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { getAuthSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 

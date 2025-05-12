@@ -1,11 +1,16 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import { useCallback, useTransition } from "react";
 
 export function SignOutButton() {
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/login" }); // Redirect to homepage after sign-out
-  };
+  const [isPending, startTransition] = useTransition();
+
+  const handleSignOut = useCallback(() => {
+    startTransition(() => {
+      signOut({ callbackUrl: "/login" }); // Redirect to homepage after sign-out
+    });
+  }, []);
 
   return (
     <button

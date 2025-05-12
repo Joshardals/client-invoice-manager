@@ -8,30 +8,30 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const Button = ({
-  type = "button",
-  loading = false,
-  disabled = false,
-  fullWidth = true,
-  className,
-  children,
-  ...props
-}: ButtonProps) => {
-  const baseStyles =
-    "flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
-
-  const widthStyles = fullWidth ? "w-full" : "w-auto";
-
+const Button = ({ type = "button", loading = false, disabled = false, className, children, ...props }: ButtonProps) => {
   return (
     <button
       type={type}
       disabled={loading || disabled}
-      className={twMerge(baseStyles, widthStyles, className)}
+      className={`
+        w-full px-6 py-3.5 text-base font-medium
+        rounded-xl bg-blue-600 text-white
+        transition-all duration-200
+        ${loading || disabled 
+          ? 'opacity-50 cursor-not-allowed' 
+          : 'hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg hover:-translate-y-0.5'
+        }
+        focus:outline-none focus:ring-4 focus:ring-blue-100
+        ${className}
+      `}
       {...props}
     >
-      {loading ? <Loader2 className="animate-spin" size={20} /> : children}
+      {loading ? (
+        <Loader2 className="animate-spin mx-auto" size={24} />
+      ) : (
+        children
+      )}
     </button>
   );
 };
-
 export default Button;

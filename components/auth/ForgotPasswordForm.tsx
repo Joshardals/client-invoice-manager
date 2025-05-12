@@ -129,7 +129,7 @@ export function ForgotPasswordForm() {
     });
   }, [router]);
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <>

@@ -206,7 +206,7 @@ export function VerifyEmailForm({
     return cleanup;
   }, [verifySession, cleanup, initialData.verificationExpires]);
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <div>

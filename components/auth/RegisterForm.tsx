@@ -159,7 +159,7 @@ export function RegisterForm() {
     };
   }, [cleanup]);
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <>

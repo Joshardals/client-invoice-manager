@@ -189,7 +189,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     );
   }
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <>

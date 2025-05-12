@@ -149,7 +149,7 @@ export function LoginForm() {
     };
   }, [cleanup]);
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <>

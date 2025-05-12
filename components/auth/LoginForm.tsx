@@ -14,6 +14,7 @@ import {
   RETRY_DELAY,
   statusAnimations,
 } from "@/lib/constants";
+import NavigationProgress from "../ui/NavigationProgress";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 export function LoginForm() {
@@ -148,20 +149,17 @@ export function LoginForm() {
     };
   }, [cleanup]);
 
-  const isLoading = loading;
+  const isLoading = loading || isPending;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gray-50">
+    <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md space-y-8 bg-white p-6 sm:p-8 rounded-2xl shadow-xl"
+        {...formAnimations}
+        className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Welcome Back
-          </h1>
-          <p className="text-base text-gray-600">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+          <p className="text-gray-600">
             Sign in to continue managing your business
           </p>
         </div>
@@ -170,77 +168,74 @@ export function LoginForm() {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
           noValidate
+          aria-label="Login form"
         >
           <InputField
             label="Email Address"
             type="email"
-            disabled={loading}
+            disabled={isLoading}
             autoComplete="email"
+            aria-required="true"
             {...register("email")}
             error={errors.email?.message}
           />
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <InputField
               label="Password"
               type="password"
-              disabled={loading}
+              disabled={isLoading}
               autoComplete="current-password"
+              aria-required="true"
               {...register("password")}
               error={errors.password?.message}
             />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handleForgotPasswordNavigation}
-                disabled={loading}
-                className="px-3 py-2 text-sm font-medium text-blue-600 
-                  hover:text-blue-700 transition-colors rounded-lg
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Forgot password?
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleForgotPasswordNavigation}
+              disabled={isLoading}
+              className="text-sm text-blue-600 hover:text-blue-500 float-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            >
+              Forgot password?
+            </button>
           </div>
 
           <AnimatePresence mode="wait">
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="p-4 rounded-xl bg-red-50 text-red-700 text-base"
+                key="error"
+                {...statusAnimations}
+                className="p-3 rounded-lg bg-red-50 text-red-700 text-sm"
               >
                 {error}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="space-y-4">
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={!isValid || loading}
-            >
-              Sign In
-            </Button>
-
-            <p className="text-center text-base text-gray-600">
-              Don't have an account?{" "}
-              <button
-                type="button"
-                onClick={handleRegisterNavigation}
-                disabled={loading}
-                className="px-3 py-2 font-medium text-blue-600 
-                  hover:text-blue-700 transition-colors rounded-lg
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Create an account
-              </button>
-            </p>
-          </div>
+          <Button
+            type="submit"
+            loading={isLoading}
+            disabled={!isValid || isLoading}
+            className="w-full"
+          >
+            Sign In
+          </Button>
         </form>
+
+        <p className="text-center text-sm text-gray-600">
+          Don't have an account?{" "}
+          <button
+            type="button"
+            onClick={handleRegisterNavigation}
+            disabled={isLoading}
+            className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            Create an account
+          </button>
+        </p>
       </motion.div>
-    </div>
+
+      <LoadingSpinner isPending={isPending} />
+    </>
   );
 }

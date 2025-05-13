@@ -23,7 +23,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             type={inputType}
             ref={ref}
             disabled={disabled}
-            className={`w-full px-4 py-2 pr-8 border rounded-lg outline-none focus:ring-1  transition-all ${
+            className={`w-full px-4 py-2 pr-8 border rounded-lg outline-none focus:ring-1 transition-all ${
               error
                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                 : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -33,6 +33,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           {isPassword && (
             <button
               type="button"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => setShowPassword(!showPassword)}
               disabled={disabled}
               className="absolute px-2 right-[0.04rem] h-full rounded-lg text-gray-500 hover:text-gray-700 cursor-pointer z-10"

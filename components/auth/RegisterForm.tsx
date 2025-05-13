@@ -237,7 +237,7 @@ export function RegisterForm() {
             type="button"
             onClick={handleLoginNavigation}
             disabled={isLoading}
-            className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="link-btn"
           >
             Sign in
           </button>

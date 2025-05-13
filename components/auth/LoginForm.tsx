@@ -149,7 +149,7 @@ export function LoginForm() {
     };
   }, [cleanup]);
 
-  const isLoading = loading || isPending;
+  const isLoading = loading;
 
   return (
     <>
@@ -180,7 +180,7 @@ export function LoginForm() {
             error={errors.email?.message}
           />
 
-          <div className="space-y-1">
+          <div>
             <InputField
               label="Password"
               type="password"
@@ -194,7 +194,7 @@ export function LoginForm() {
               type="button"
               onClick={handleForgotPasswordNavigation}
               disabled={isLoading}
-              className="text-sm text-blue-600 hover:text-blue-500 float-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className="text-sm mb my-1 text-blue-600 hover:text-blue-500 cursor-pointer float-right focus:outline-none  disabled:opacity-50"
             >
               Forgot password?
             </button>
@@ -228,7 +228,7 @@ export function LoginForm() {
             type="button"
             onClick={handleRegisterNavigation}
             disabled={isLoading}
-            className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className="link-btn"
           >
             Create an account
           </button>

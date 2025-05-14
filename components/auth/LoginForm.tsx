@@ -155,18 +155,20 @@ export function LoginForm() {
     <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-gray-600">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Welcome Back
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Sign in to continue managing your business
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
           noValidate
           aria-label="Login form"
         >
@@ -194,7 +196,7 @@ export function LoginForm() {
               type="button"
               onClick={handleForgotPasswordNavigation}
               disabled={isLoading}
-              className="text-sm mb my-1 text-blue-600 hover:text-blue-500 cursor-pointer float-right focus:outline-none  disabled:opacity-50"
+              className="text-xs sm:text-sm my-1 text-blue-600 hover:text-blue-500 cursor-pointer float-right focus:outline-none disabled:opacity-50"
             >
               Forgot password?
             </button>
@@ -205,7 +207,7 @@ export function LoginForm() {
               <motion.div
                 key="error"
                 {...statusAnimations}
-                className="p-3 rounded-lg bg-red-50 text-red-700 text-sm"
+                className="p-2 sm:p-3 rounded-lg bg-red-50 text-red-700 text-xs sm:text-sm"
               >
                 {error}
               </motion.div>
@@ -216,25 +218,23 @@ export function LoginForm() {
             type="submit"
             loading={isLoading}
             disabled={!isValid || isLoading}
-            className="w-full"
           >
             Sign In
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-xs sm:text-sm text-gray-600">
           Don't have an account?{" "}
           <button
             type="button"
             onClick={handleRegisterNavigation}
             disabled={isLoading}
-            className="link-btn"
+            className="link-btn text-xs sm:text-sm"
           >
             Create an account
           </button>
         </p>
       </motion.div>
-
       <LoadingSpinner isPending={isPending} />
     </>
   );

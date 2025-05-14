@@ -13,7 +13,10 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
     return (
       <div className="space-y-1">
-        <label htmlFor={name} className="text-sm font-medium text-gray-700">
+        <label
+          htmlFor={name}
+          className="text-xs sm:text-sm font-medium text-gray-700"
+        >
           {label}
         </label>
         <div className="relative">
@@ -23,7 +26,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             type={inputType}
             ref={ref}
             disabled={disabled}
-            className={`w-full px-4 py-2 pr-8 border rounded-lg outline-none focus:ring-1 transition-all ${
+            className={`w-full px-3 sm:px-4 py-2 pr-8 text-sm sm:text-base border rounded-lg outline-none focus:ring-1 transition-all ${
               error
                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                 : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -42,7 +45,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             </button>
           )}
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-xs sm:text-sm text-red-600">{error}</p>}
         {hintText && isPassword && !error && (
           <p className="text-xs text-gray-500">{hintText}</p>
         )}

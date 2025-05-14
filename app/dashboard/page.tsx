@@ -1,4 +1,4 @@
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { Dashboard } from "@/components/Dashboard/Dashboard";
 import { getAuthSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -7,12 +7,5 @@ export default async function DashboardPage() {
 
   if (!session) redirect("/login");
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Welcome, {session.user?.name}</h1>
-      <p className="mb-12">This is your protected dashboard.</p>
-
-      <SignOutButton />
-    </div>
-  );
+  return <Dashboard />;
 }

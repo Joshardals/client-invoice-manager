@@ -135,11 +135,13 @@ export function ForgotPasswordForm() {
     <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Reset Password</h1>
-          <p className="text-gray-600">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Reset Password
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-600">
             Enter your email address and we'll send you instructions to reset
             your password.
           </p>
@@ -147,7 +149,7 @@ export function ForgotPasswordForm() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
           noValidate
         >
           <InputField
@@ -162,18 +164,18 @@ export function ForgotPasswordForm() {
             {status.message && (
               <motion.div
                 {...statusAnimations}
-                className={`p-3 rounded-lg ${
+                className={`p-2 sm:p-3 rounded-lg ${
                   status.type === "success"
                     ? "bg-green-50 text-green-700"
                     : "bg-red-50 text-red-700"
-                } text-sm`}
+                } text-xs sm:text-sm`}
               >
                 {status.message}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <Button
               type="submit"
               loading={isLoading}
@@ -187,7 +189,7 @@ export function ForgotPasswordForm() {
               type="button"
               onClick={handleLoginNavigation}
               disabled={isLoading}
-              className="w-full text-sm text-gray-600 hover:text-gray-900"
+              className="w-full text-xs sm:text-sm text-gray-600 hover:text-gray-900"
             >
               Back to Login
             </button>

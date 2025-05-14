@@ -209,34 +209,34 @@ export function VerifyEmailForm({
   const isLoading = loading;
 
   return (
-    <div>
+    <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Verify Your Email
           </h1>
           {userEmail && (
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               We sent a verification code to {userEmail}
             </p>
           )}
           {timeRemaining > 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               Code expires in: {formatTime(timeRemaining)}
             </p>
           )}
           {isExpired && (
-            <p className="text-sm text-red-500">
+            <p className="text-xs sm:text-sm text-red-500">
               Code has expired. Please request a new one.
             </p>
           )}
         </div>
 
-        <form onSubmit={handleVerify} className="space-y-6">
-          <div className="space-y-2">
+        <form onSubmit={handleVerify} className="space-y-4 sm:space-y-6">
+          <div className="space-y-1 sm:space-y-2">
             <InputField
               label="Verification Code"
               name="code"
@@ -253,7 +253,7 @@ export function VerifyEmailForm({
             {status.message && (
               <motion.div
                 {...statusAnimations}
-                className={`p-3 rounded-lg flex items-center ${
+                className={`p-2 sm:p-3 rounded-lg flex items-center ${
                   status.type === "success"
                     ? "bg-green-50 text-green-700"
                     : status.type === "error"
@@ -261,20 +261,20 @@ export function VerifyEmailForm({
                       : status.type === "info"
                         ? "bg-blue-50 text-blue-700"
                         : "bg-gray-50 text-gray-700"
-                } text-sm`}
+                } text-xs sm:text-sm`}
               >
                 {status.type === "success" && (
-                  <CheckCircle className="w-4 h-4 mr-2" />
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 )}
                 {status.type === "error" && (
-                  <AlertCircle className="w-4 h-4 mr-2" />
+                  <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 )}
                 {status.message}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <Button
               type="submit"
               loading={loading}
@@ -293,7 +293,7 @@ export function VerifyEmailForm({
               type="button"
               onClick={handleResendCode}
               disabled={!canResend || resendLoading || isPending}
-              className="w-full text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-xs sm:text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {canResend
                 ? "Resend Code"
@@ -303,6 +303,6 @@ export function VerifyEmailForm({
         </form>
       </motion.div>
       <LoadingSpinner isPending={isPending} />
-    </div>
+    </>
   );
 }

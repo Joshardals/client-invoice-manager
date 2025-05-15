@@ -7,3 +7,10 @@ export const formatTime = (seconds: number) => {
 export function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+export const today = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});

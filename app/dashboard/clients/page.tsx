@@ -1,7 +1,8 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Eye, Edit2, Trash2, Search } from "lucide-react";
+import { Eye, Edit2, Trash2, Search, ArrowLeft } from "lucide-react";
 import Table from "@/components/ui/Table";
+import { useRouter } from "next/navigation";
 
 interface Client {
   id: number;
@@ -17,6 +18,7 @@ interface TableColumn<T> {
 }
 
 export default function ClientsPage() {
+  const router = useRouter();
   const initialClients: Client[] = [
     {
       id: 1,
@@ -86,7 +88,11 @@ export default function ClientsPage() {
     );
   }, []);
 
-  // Fixed column definitions with proper typing
+  const handleBack = useCallback(() => {
+    console.log("Navigate back");
+    router.back();
+  }, []);
+
   const columns: TableColumn<Client>[] = [
     { header: "Full Name", accessor: "name" as keyof Client },
     { header: "Email", accessor: "email" as keyof Client },
@@ -120,6 +126,15 @@ export default function ClientsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          <span className="text-sm">Back</span>
+        </button>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>

@@ -58,14 +58,51 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+// Add clientSchema for adding client information
+export const clientSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Only letters and spaces allowed"),
+  email: z
+    .string()
+    .email("Please enter a valid email")
+    .toLowerCase()
+    .max(255, "Email is too long"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 characters")
+    .max(15, "Phone number is too long")
+    .optional()
+    .or(z.literal("")),
+  company: z
+    .string()
+    .max(100, "Company name is too long")
+    .optional()
+    .or(z.literal("")),
+  address: z
+    .string()
+    .max(200, "Address is too long")
+    .optional()
+    .or(z.literal("")),
+  notes: z
+    .string()
+    .max(1000, "Notes cannot exceed 1000 characters")
+    .optional()
+    .or(z.literal("")),
+});
+
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+type ClientFormData = z.infer<typeof clientSchema>;
 
 export {
   type RegisterFormData,
   type LoginFormData,
   type ForgotPasswordFormData,
   type ResetPasswordFormData,
+  type ClientFormData,
 };

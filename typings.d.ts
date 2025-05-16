@@ -1,10 +1,10 @@
 export interface InputFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label: React.ReactNode;
   name: string;
   error?: string;
   hintText?: string;
-}
+}j
 
 export interface RegisterFormData {
   name: string;

@@ -12,10 +12,10 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     return (
-      <div className="space-y-1">
+      <div className="space-y-2.5">
         <label
           htmlFor={name}
-          className="text-xs sm:text-sm font-medium text-gray-700"
+          className="block text-xs sm:text-sm font-medium text-gray-700"
         >
           {label}
         </label>

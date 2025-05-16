@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState, FormEvent, ChangeEvent } from "react";
+import React, { useCallback, useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -10,7 +10,11 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
-import { ClientFormData } from "@/lib/form/validation";
+import { ClientFormData, clientSchema } from "@/lib/form/validation";
+import InputField from "../ui/InputField";
+import Button from "../ui/Button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -25,30 +29,47 @@ export function AddClientModal({
 }: AddClientModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<ClientFormData>({
-    fullName: "",
-    email: "",
-    phone: "",
-    company: "",
-    address: "",
-    notes: "",
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors, isValid },
+    reset,
+  } = useForm<ClientFormData>({
+    resolver: zodResolver(clientSchema),
+    mode: "onChange",
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      company: "",
+      address: "",
+      notes: "",
+    },
   });
 
+  const goToNextStep = async () => {
+    const isValidStep = await trigger(
+      currentStep === 1
+        ? ["fullName", "email"]
+        : currentStep === 2
+          ? ["phone", "company"]
+          : ["address", "notes"]
+    );
+
+    if (isValidStep) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
   const onSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    async (data: ClientFormData) => {
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        onSuccess(formData);
-        setFormData({
-          fullName: "",
-          email: "",
-          phone: "",
-          company: "",
-          address: "",
-          notes: "",
-        });
+        await new Promise((r) => setTimeout(r, 1000));
+        onSuccess(data);
+        reset();
+        setCurrentStep(1);
         onClose();
       } catch (error) {
         console.error("Error:", error);
@@ -56,18 +77,9 @@ export function AddClientModal({
         setIsLoading(false);
       }
     },
-    [formData, onSuccess, onClose]
+    [onSuccess, onClose]
   );
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const inputClasses =
-    "w-full px-3 py-2 sm:px-4 sm:py-3 bg-gray-50 border-0 rounded-lg sm:rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm sm:text-base";
   const labelClasses =
     "flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2";
 
@@ -76,6 +88,28 @@ export function AddClientModal({
     { number: 2, title: "Contact" },
     { number: 3, title: "Additional" },
   ] as const;
+
+  const StepConnector = ({ active }: { active: boolean }) => (
+    <div className="flex-1 h-0.5 mx-2">
+      <div
+        className={`h-full transition-colors duration-300 ${
+          active ? "bg-green-600" : "bg-gray-200"
+        }`}
+      />
+    </div>
+  );
+
+  const labelWithIcon = (
+    Icon: React.ElementType,
+    text: string,
+    required?: boolean
+  ) => (
+    <span className="flex items-center">
+      <Icon className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+      {text}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </span>
+  );
 
   return (
     <AnimatePresence>
@@ -112,41 +146,47 @@ export function AddClientModal({
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
+                  <Button
                     onClick={onClose}
-                    className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors"
+                    className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors"
+                    fullWidth={false}
                   >
                     <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-                  </button>
+                  </Button>
                 </div>
 
-                <div className="flex justify-between mt-4 sm:mt-6">
-                  {steps.map((step) => (
-                    <div key={step.number} className="flex items-center">
-                      <div
-                        className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-xs sm:text-sm ${
-                          currentStep === step.number
-                            ? "bg-blue-600 text-white"
-                            : currentStep > step.number
-                              ? "bg-green-500 text-white"
-                              : "bg-gray-200 text-gray-600"
-                        }`}
-                      >
-                        {step.number}
+                <div className="flex items-center justify-between mt-4 sm:mt-6 px-2">
+                  {steps.map((step, index) => (
+                    <React.Fragment key={step.number}>
+                      <div className="flex items-center">
+                        <div
+                          className={`
+                            flex items-center justify-center w-8 h-8 rounded-full
+                            text-sm font-medium transition-colors duration-300
+                            ${
+                              currentStep === step.number
+                                ? "bg-blue-600 text-white"
+                                : currentStep > step.number
+                                  ? "bg-green-500 text-white"
+                                  : "bg-gray-200 text-gray-600"
+                            }
+                          `}
+                        >
+                          {step.number}
+                        </div>
+                        <span className="hidden sm:block ml-3 text-sm font-medium text-gray-600">
+                          {step.title}
+                        </span>
                       </div>
-                      <span className="hidden sm:block ml-2 text-xs sm:text-sm font-medium text-gray-600">
-                        {step.title}
-                      </span>
-                      {step.number < 3 && (
-                        <div className="w-8 sm:w-12 h-0.5 mx-1 sm:mx-2 bg-gray-200" />
+                      {index < steps.length - 1 && (
+                        <StepConnector active={currentStep > step.number} />
                       )}
-                    </div>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
 
-              <form onSubmit={onSubmit} className="p-4 sm:p-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6">
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -154,93 +194,55 @@ export function AddClientModal({
                 >
                   {currentStep === 1 && (
                     <>
-                      <div>
-                        <label htmlFor="fullName" className={labelClasses}>
-                          Full Name <span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <input
-                          id="fullName"
-                          type="text"
-                          name="fullName"
-                          className={inputClasses}
-                          placeholder="Enter full name"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                        />
-                      </div>
+                      <InputField
+                        label={labelWithIcon(UserPlus, "Full Name", true)}
+                        placeholder="Enter full name"
+                        disabled={isLoading}
+                        {...register("fullName")}
+                        error={errors.fullName?.message}
+                      />
 
-                      <div>
-                        <label htmlFor="email" className={labelClasses}>
-                          <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Email Address
-                          <span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <input
-                          id="email"
-                          type="email"
-                          name="email"
-                          className={inputClasses}
-                          placeholder="Enter email address"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                        />
-                      </div>
+                      <InputField
+                        label={labelWithIcon(Mail, "Email Address", true)}
+                        type="email"
+                        placeholder="Enter email address"
+                        disabled={isLoading}
+                        {...register("email")}
+                        error={errors.email?.message}
+                      />
                     </>
                   )}
 
                   {currentStep === 2 && (
                     <>
-                      <div>
-                        <label htmlFor="phone" className={labelClasses}>
-                          <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Phone Number
-                        </label>
-                        <input
-                          id="phone"
-                          type="tel"
-                          name="phone"
-                          className={inputClasses}
-                          placeholder="Enter phone number"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                        />
-                      </div>
+                      <InputField
+                        label={labelWithIcon(Phone, "Phone Number")}
+                        type="tel"
+                        placeholder="Enter phone number"
+                        disabled={isLoading}
+                        {...register("phone")}
+                        error={errors.phone?.message}
+                      />
 
-                      <div>
-                        <label htmlFor="company" className={labelClasses}>
-                          <Building2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Company Name
-                        </label>
-                        <input
-                          id="company"
-                          type="text"
-                          name="company"
-                          className={inputClasses}
-                          placeholder="Enter company name"
-                          value={formData.company}
-                          onChange={handleInputChange}
-                        />
-                      </div>
+                      <InputField
+                        label={labelWithIcon(Building2, "Company Name")}
+                        placeholder="Enter company name"
+                        disabled={isLoading}
+                        {...register("company")}
+                        error={errors.company?.message}
+                      />
                     </>
                   )}
 
                   {currentStep === 3 && (
                     <>
-                      <div>
-                        <label htmlFor="address" className={labelClasses}>
-                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Address
-                        </label>
-                        <input
-                          id="address"
-                          type="text"
-                          name="address"
-                          className={inputClasses}
-                          placeholder="Enter address"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                        />
-                      </div>
+                      <InputField
+                        label={labelWithIcon(MapPin, "Address")}
+                        placeholder="Enter address"
+                        disabled={isLoading}
+                        {...register("address")}
+                        error={errors.address?.message}
+                      />
 
                       <div>
                         <label htmlFor="notes" className={labelClasses}>
@@ -249,12 +251,11 @@ export function AddClientModal({
                         </label>
                         <textarea
                           id="notes"
-                          name="notes"
-                          className={`${inputClasses} resize-none`}
+                          className="w-full px-3 py-2 sm:px-4 bg-gray-50 border-0 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm sm:text-base resize-none"
                           rows={4}
                           placeholder="Enter any additional notes"
-                          value={formData.notes}
-                          onChange={handleInputChange}
+                          {...register("notes")}
+                          disabled={isLoading}
                         />
                       </div>
                     </>
@@ -262,35 +263,34 @@ export function AddClientModal({
                 </motion.div>
 
                 <div className="flex justify-between mt-6 sm:mt-8">
-                  <button
-                    type="button"
+                  <Button
                     onClick={() =>
                       currentStep > 1 && setCurrentStep((step) => step - 1)
                     }
-                    className={`px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-700 hover:bg-gray-100 transition-colors
-                      ${currentStep === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={currentStep === 1 || isLoading}
+                    className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    fullWidth={false}
                   >
                     Previous
-                  </button>
+                  </Button>
 
                   {currentStep < 3 ? (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep((step) => step + 1)}
-                      className="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                    <Button
+                      onClick={goToNextStep}
                       disabled={isLoading}
+                      fullWidth={false}
                     >
                       Next
-                    </button>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
                       type="submit"
-                      disabled={isLoading}
-                      className="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
+                      loading={isLoading}
+                      disabled={!isValid}
+                      fullWidth={false}
                     >
-                      {isLoading ? "Saving..." : "Save Client"}
-                    </button>
+                      Add Client
+                    </Button>
                   )}
                 </div>
               </form>

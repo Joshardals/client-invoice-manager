@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { AddClientModal } from "./AddClientModal";
 import { toast } from "react-toastify";
 import { ClientFormData } from "@/lib/form/validation";
+import Button from "../ui/Button";
 
 interface Invoice {
   id: number;
@@ -160,17 +161,21 @@ export function Dashboard() {
 
           {/* Quick Actions */}
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 sm:gap-3">
-            <button
+            <Button
               onClick={() => setIsAddClientModalOpen(true)}
-              className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base touch-manipulation"
+              fullWidth={false}
             >
               <PlusCircle className="w-4 h-4 mr-1.5 sm:mr-2" />
               Add Client
-            </button>
-            <button className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
+            </Button>
+
+            <Button
+              onClick={() => setIsAddClientModalOpen(true)}
+              fullWidth={false}
+            >
               <FilePlus className="w-4 h-4 mr-1.5 sm:mr-2" />
               Create Invoice
-            </button>
+            </Button>
           </div>
         </div>
 

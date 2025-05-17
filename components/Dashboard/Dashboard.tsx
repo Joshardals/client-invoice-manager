@@ -17,9 +17,10 @@ import { today } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AddClientModal } from "./AddClientModal";
 import { toast } from "react-toastify";
-import { ClientFormData, InvoiceFormData } from "@/lib/form/validation";
+import { ClientFormData } from "@/lib/form/validation";
 import Button from "../ui/Button";
 import { CreateInvoiceModal } from "./CreateInvoiceModal";
+import { InvoiceData } from "@/typings";
 
 interface Invoice {
   id: number;
@@ -150,7 +151,7 @@ export function Dashboard() {
     console.log(clientData);
   }, []);
 
-  const handleCreateInvoiceSuccess = useCallback((data: InvoiceFormData) => {
+  const handleCreateInvoiceSuccess = useCallback((data: InvoiceData) => {
     toast.success("Invoice created successfully");
     console.log(data);
     setIsCreateInvoiceModalOpen(false);

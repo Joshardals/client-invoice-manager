@@ -58,7 +58,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             {...props}
           />
           {isCurrency && (
-            <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none select-none">
+            <div className="absolute left-3 sm:left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none select-none">
               {currencySymbol}
             </div>
           )}

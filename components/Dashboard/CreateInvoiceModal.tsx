@@ -188,7 +188,7 @@ export function CreateInvoiceModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
           >
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-auto">
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh] overflow-auto">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
@@ -317,7 +317,7 @@ export function CreateInvoiceModal({
                       />
 
                       <div className="space-y-4">
-                        <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-700">
+                        <div className="bg-blue-50 p-4 rounded-lg text-xs sm:text-sm text-blue-700">
                           Add items you're billing for. Each item should include
                           what you're charging for, how many units/hours, and
                           the rate per unit/hour.

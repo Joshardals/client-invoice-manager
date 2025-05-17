@@ -28,6 +28,7 @@ import { InvoiceData } from "@/typings";
 import SelectField from "../ui/SelectField";
 import { InvoiceSummary } from "./invoiceSummary";
 import { Label } from "../ui/Label";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -52,6 +53,7 @@ export function CreateInvoiceModal({
   clients,
   onSubmit: handleSubmitInvoice,
 }: CreateInvoiceModalProps) {
+  useLockBodyScroll(isOpen);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 

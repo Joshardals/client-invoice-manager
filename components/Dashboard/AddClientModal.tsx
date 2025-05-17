@@ -18,9 +18,10 @@ import Button from "../ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "react-international-phone";
-import "react-international-phone/style.css";
 import { isPhoneValid } from "@/lib/utils";
 import { Label } from "../ui/Label";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
+import "react-international-phone/style.css";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function AddClientModal({
   onClose,
   onSuccess,
 }: AddClientModalProps) {
+  useLockBodyScroll(isOpen);
   const [phone, setPhone] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);

@@ -112,6 +112,7 @@ export type InvoiceFormInput = {
 };
 
 export const invoiceItemSchema = z.object({
+  id: z.string().optional(),
   description: z.string().min(1, "Description is required"),
   quantity: z.number().min(0.1, "Quantity must be greater than 0"),
   rate: z.number().min(1, "Rate must be greater than 0"),

@@ -1,9 +1,8 @@
-"use client";
 import React from "react";
 import { motion } from "framer-motion";
 
 interface TableColumn<T> {
-  header: string;
+  header: string | (() => React.ReactNode);
   accessor: keyof T | ((item: T) => React.ReactNode);
 }
 
@@ -37,7 +36,9 @@ export default function Table<T extends { id?: number | string }>({
                   key={index}
                   className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  {column.header}
+                  {typeof column.header === "function"
+                    ? column.header()
+                    : column.header}
                 </th>
               ))}
               {actions && (

@@ -1,6 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  SubmitHandler,
+  useWatch,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   X,
@@ -20,6 +25,7 @@ import Button from "../ui/Button";
 import { InvoiceFormData, invoiceSchema } from "@/lib/form/validation";
 import { InvoiceData } from "@/typings";
 import SelectField from "../ui/SelectField";
+import { InvoiceSummary } from "./invoiceSummary";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -54,7 +60,7 @@ export function CreateInvoiceModal({
     currency: "NGN" as const,
     clientId: "",
     description: "",
-    items: [{ description: "", quantity: 1, rate: 0, total: 0 }],
+    items: [{ id: "item-0", description: "", quantity: 1, rate: 0, total: 0 }],
   };
 
   const {
@@ -76,11 +82,16 @@ export function CreateInvoiceModal({
     name: "items",
   });
 
-  const items = watch("items");
+  const watchedItems = useWatch({
+    control,
+    name: "items",
+  });
 
   const grandTotal = useMemo(
-    () => items?.reduce((sum, item) => sum + item.quantity * item.rate, 0) || 0,
-    [items]
+    () =>
+      watchedItems?.reduce((sum, item) => sum + item.quantity * item.rate, 0) ||
+      0,
+    [watchedItems]
   );
 
   const handleAddItem = () => {
@@ -88,7 +99,7 @@ export function CreateInvoiceModal({
   };
 
   const calculateItemTotal = (index: number) => {
-    const item = items[index];
+    const item = watchedItems[index];
     if (item) {
       const total = item.quantity * item.rate;
       setValue(`items.${index}.total`, total);
@@ -424,8 +435,8 @@ export function CreateInvoiceModal({
                                     </label>
                                     <div className="flex items-center py-2 px-3 sm:px-4 bg-gray-50 rounded-lg text-sm sm:text-base">
                                       {formatAmount(
-                                        (items[index]?.quantity || 0) *
-                                          (items[index]?.rate || 0)
+                                        (watchedItems[index]?.quantity || 0) *
+                                          (watchedItems[index]?.rate || 0)
                                       )}
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
@@ -463,12 +474,21 @@ export function CreateInvoiceModal({
 
                   {currentStep === 3 && (
                     <div className="space-y-4 sm:space-y-6">
-                      <div className="bg-gray-50 p-4 sm:p-6 rounded-xl space-y-4">
-                        <h3 className="font-semibold text-base sm:text-lg">
-                          Invoice Summary
-                        </h3>
-                        {/* Add summary content here */}
-                      </div>
+                      <InvoiceSummary
+                        invoiceData={{
+                          title: watch("title"),
+                          description: watch("description"),
+                          invoiceDate: watch("invoiceDate"),
+                          dueDate: watch("dueDate"),
+                          currency: watch("currency"),
+                          clientId: watch("clientId"),
+                          items: watch("items")?.map((item, index) => ({
+                            ...item,
+                            id: `item-${index}`, // Add an id to each item
+                          })),
+                        }}
+                        clients={clients}
+                      />
                     </div>
                   )}
                 </motion.div>

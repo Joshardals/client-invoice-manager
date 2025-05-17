@@ -4,12 +4,22 @@ import type { InputFieldProps } from "@/typings";
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (
-    { label, name, type = "text", error, disabled, hintText, ...props },
+    {
+      label,
+      name,
+      type = "text",
+      error,
+      disabled,
+      hintText,
+      currencySymbol,
+      ...props
+    },
     ref
   ) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const isDate = type === "date";
+    const isCurrency = currencySymbol != null;
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     return (
@@ -29,6 +39,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             disabled={disabled}
             className={`w-full px-3 sm:px-4 py-2 ${
               isPassword || isDate ? "pr-10" : "pr-3"
+            } ${
+              isCurrency ? "pl-7 sm:pl-8" : ""
             } text-sm sm:text-base border rounded-lg outline-none focus:ring-1 transition-all ${
               error
                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
@@ -45,6 +57,11 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             }`}
             {...props}
           />
+          {isCurrency && (
+            <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none select-none">
+              {currencySymbol}
+            </div>
+          )}
           {isPassword && (
             <button
               type="button"

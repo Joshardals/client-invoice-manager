@@ -95,14 +95,44 @@ export function CreateInvoiceModal({
     }
   };
 
-  const goToNextStep = async () => {
-    const fieldsToValidate: FieldName[] =
-      currentStep === 1
-        ? ["title", "invoiceDate", "dueDate", "currency"]
-        : ["clientId", "items"];
+  const formatAmount = (amount: number, currency: string) => {
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
-    const isStepValid = await trigger(fieldsToValidate);
-    if (isStepValid) setCurrentStep((prev) => prev + 1);
+    try {
+      return formatter.format(amount);
+    } catch (error) {
+      console.error("Error formatting amount:", error);
+      return `${currency} ${amount.toFixed(2)}`;
+    }
+  };
+
+  const goToNextStep = async () => {
+    if (currentStep === 1) {
+      const isStepValid = await trigger([
+        "title",
+        "invoiceDate",
+        "dueDate",
+        "currency",
+      ]);
+      if (isStepValid) setCurrentStep(2);
+    } else if (currentStep === 2) {
+      // Trigger validation for all items fields and clientId
+      const fieldsToValidate: FieldName[] = [
+        "clientId",
+        ...fields.flatMap((_, index): FieldName[] => [
+          `items.${index}.description` as `items.${number}.description`,
+          `items.${index}.quantity` as `items.${number}.quantity`,
+          `items.${index}.rate` as `items.${number}.rate`,
+        ]),
+      ];
+      const isStepValid = await trigger(fieldsToValidate);
+      if (isStepValid) setCurrentStep(3);
+    }
   };
 
   const goToPrevStep = () => setCurrentStep((prev) => prev - 1);
@@ -274,11 +304,11 @@ export function CreateInvoiceModal({
                   {currentStep === 2 && (
                     <div className="space-y-4 sm:space-y-6">
                       <SelectField
-                        label="Client"
+                        label="Select Client"
                         {...register("clientId")}
                         error={errors.clientId?.message}
                         options={[
-                          { value: "", label: "Select Client" },
+                          { value: "", label: "Choose who you're billing..." },
                           ...(clients?.map((client) => ({
                             value: client.id,
                             label: client.name,
@@ -287,76 +317,133 @@ export function CreateInvoiceModal({
                       />
 
                       <div className="space-y-4">
-                        {fields.map((field, index) => (
-                          <div
-                            key={field.id}
-                            className="flex flex-col sm:flex-row gap-4 items-start"
-                          >
-                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-4">
-                              <div className="sm:col-span-6">
-                                <InputField
-                                  label="Description"
-                                  {...register(`items.${index}.description`)}
-                                  placeholder="Item description"
-                                  error={
-                                    errors.items?.[index]?.description?.message
-                                  }
-                                />
-                              </div>
-                              <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 sm:col-span-6">
-                                <div className="sm:col-span-2">
+                        <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-700">
+                          Add items you're billing for. Each item should include
+                          what you're charging for, how many units/hours, and
+                          the rate per unit/hour.
+                        </div>
+
+                        {fields.map((field, index) => {
+                          const currency = watch("currency");
+                          const currencySymbol = {
+                            NGN: "₦",
+                            USD: "$",
+                            GBP: "£",
+                            EUR: "€",
+                          }[currency];
+
+                          const formatAmount = (amount: number) => {
+                            return new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: currency,
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(amount);
+                          };
+
+                          return (
+                            <div
+                              key={field.id}
+                              className="flex flex-col sm:flex-row gap-4 items-start p-4 border border-gray-200 rounded-lg"
+                            >
+                              <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 w-full gap-4">
+                                <div className="sm:col-span-6">
                                   <InputField
-                                    label="Quantity"
-                                    type="number"
-                                    {...register(`items.${index}.quantity`, {
-                                      valueAsNumber: true,
-                                      onChange: (e) => {
-                                        const value = Number(e.target.value);
-                                        setValue(
-                                          `items.${index}.quantity`,
-                                          value
-                                        );
-                                        calculateItemTotal(index);
-                                      },
-                                    })}
-                                    placeholder="Qty"
+                                    label="What are you charging for?"
+                                    {...register(`items.${index}.description`)}
+                                    placeholder="e.g. Logo Design, Content Writing (2 Articles), Web Development"
                                     error={
-                                      errors.items?.[index]?.quantity?.message
+                                      errors.items?.[index]?.description
+                                        ?.message
                                     }
                                   />
                                 </div>
-                                <div className="sm:col-span-2">
-                                  <InputField
-                                    label="Rate"
-                                    type="number"
-                                    {...register(`items.${index}.rate`, {
-                                      valueAsNumber: true,
-                                      onChange: (e) => {
-                                        const value = Number(e.target.value);
-                                        setValue(`items.${index}.rate`, value);
-                                        calculateItemTotal(index);
-                                      },
-                                    })}
-                                    error={errors.items?.[index]?.rate?.message}
-                                  />
-                                </div>
-                                <div className="sm:col-span-2">
-                                  <div className="h-full flex items-center px-3 sm:px-4 bg-gray-50 rounded-lg text-sm sm:text-base">
-                                    {(items[index]?.quantity || 0) *
-                                      (items[index]?.rate || 0)}
+                                <div className="grid grid-cols-1 gap-4 sm:col-span-6">
+                                  <div className="sm:col-span-2">
+                                    <InputField
+                                      label="How many units/hours?"
+                                      type="number"
+                                      {...register(`items.${index}.quantity`, {
+                                        valueAsNumber: true,
+                                        onChange: (e) => {
+                                          const value = Number(e.target.value);
+                                          setValue(
+                                            `items.${index}.quantity`,
+                                            value
+                                          );
+                                          calculateItemTotal(index);
+                                        },
+                                      })}
+                                      placeholder="e.g. 2 hours, 5 units"
+                                      error={
+                                        errors.items?.[index]?.quantity?.message
+                                      }
+                                    />
+                                    {!errors.items?.[index]?.quantity
+                                      ?.message && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Enter the number of hours or units
+                                        you're billing
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <div className="relative">
+                                      <InputField
+                                        label={`Rate per unit/hour (${currency})`}
+                                        type="number"
+                                        currencySymbol={currencySymbol}
+                                        {...register(`items.${index}.rate`, {
+                                          valueAsNumber: true,
+                                          onChange: (e) => {
+                                            const value = Number(
+                                              e.target.value
+                                            );
+                                            setValue(
+                                              `items.${index}.rate`,
+                                              value
+                                            );
+                                            calculateItemTotal(index);
+                                          },
+                                        })}
+                                        placeholder={`e.g. ${currencySymbol}5000 per hour/unit`}
+                                        error={
+                                          errors.items?.[index]?.rate?.message
+                                        }
+                                      />
+                                    </div>
+                                    {!errors.items?.[index]?.rate?.message && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        How much do you charge per hour/unit?
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                                      Line Total
+                                    </label>
+                                    <div className="flex items-center py-2 px-3 sm:px-4 bg-gray-50 rounded-lg text-sm sm:text-base">
+                                      {formatAmount(
+                                        (items[index]?.quantity || 0) *
+                                          (items[index]?.rate || 0)
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Unit/Hour × Rate = Total
+                                    </p>
                                   </div>
                                 </div>
                               </div>
+                              <Button
+                                onClick={() => remove(index)}
+                                className="bg-red-100 hover:bg-red-200 p-2 rounded-lg"
+                                fullWidth={false}
+                              >
+                                <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+                              </Button>
                             </div>
-                            <Button
-                              onClick={() => remove(index)}
-                              className="bg-red-100 hover:bg-red-200 p-2 rounded-lg"
-                              fullWidth={false}
-                            >
-                              <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-                            </Button>
-                          </div>
-                        ))}
+                          );
+                        })}
 
                         <Button
                           onClick={handleAddItem}
@@ -364,12 +451,12 @@ export function CreateInvoiceModal({
                           fullWidth={false}
                         >
                           <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                          Add Item
+                          Add Another Item
                         </Button>
                       </div>
 
                       <div className="flex justify-end text-lg sm:text-xl font-bold">
-                        Total: {grandTotal}
+                        Total: {formatAmount(grandTotal, watch("currency"))}
                       </div>
                     </div>
                   )}

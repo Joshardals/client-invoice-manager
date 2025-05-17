@@ -4,6 +4,7 @@ export interface InputFieldProps
   name: string;
   error?: string;
   hintText?: string;
+  currencySymbol?: string;
 }
 j;
 

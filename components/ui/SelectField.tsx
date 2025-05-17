@@ -1,17 +1,6 @@
+import { SelectFieldProps } from "@/typings";
 import { ChevronDown } from "lucide-react";
 import { forwardRef } from "react";
-
-interface SelectFieldProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string;
-  name?: string;
-  error?: string;
-  disabled?: boolean;
-  options: {
-    value: string;
-    label: string;
-  }[];
-}
 
 const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
   ({ label, name, error, disabled, options, ...props }, ref) => {

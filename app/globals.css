@@ -17,3 +17,8 @@ body {
 .link-btn {
   @apply font-medium text-blue-600 hover:text-blue-500 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
 }
+
+/* I used this in Add Client Modal  */
+.label-classes {
+  @apply flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-2.5;
+}

@@ -18,6 +18,7 @@ import {
   ArrowRight,
   ArrowLeft,
   ChevronDown,
+  UserPlus,
 } from "lucide-react";
 
 import InputField from "../ui/InputField";
@@ -26,6 +27,7 @@ import { InvoiceFormData, invoiceSchema } from "@/lib/form/validation";
 import { InvoiceData } from "@/typings";
 import SelectField from "../ui/SelectField";
 import { InvoiceSummary } from "./invoiceSummary";
+import { Label } from "../ui/Label";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -199,9 +201,10 @@ export function CreateInvoiceModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
           >
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh] overflow-auto">
+            {/* <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh] overflow-auto"> */}
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
               {/* Header */}
-              <div className="p-4 sm:p-6 border-b border-gray-100">
+              <div className="p-4 sm:p-6 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div className="bg-purple-100 p-2 sm:p-3 rounded-lg">
@@ -258,7 +261,11 @@ export function CreateInvoiceModal({
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6">
+              {/* <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6"></form> */}
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex-1 overflow-y-auto p-4 sm:p-6"
+              >
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -267,7 +274,7 @@ export function CreateInvoiceModal({
                   {currentStep === 1 && (
                     <div className="space-y-4 sm:space-y-6">
                       <InputField
-                        label="Invoice Title"
+                        label={Label(FileText, "Invoice Title", true)}
                         {...register("title")}
                         error={errors.title?.message}
                         placeholder="e.g. Website Redesign Project"
@@ -276,14 +283,14 @@ export function CreateInvoiceModal({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <InputField
                           type="date"
-                          label="Invoice Date"
+                          label={Label(null, "Invoice Date", true)}
                           {...register("invoiceDate")}
                           error={errors.invoiceDate?.message}
                         />
 
                         <InputField
                           type="date"
-                          label="Due Date"
+                          label={Label(null, "Due Date", true)}
                           {...register("dueDate")}
                           error={errors.dueDate?.message}
                         />
@@ -291,7 +298,7 @@ export function CreateInvoiceModal({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <SelectField
-                          label="Currency"
+                          label={Label(null, "Currency", true)}
                           {...register("currency")}
                           error={errors.currency?.message}
                           options={[
@@ -315,7 +322,7 @@ export function CreateInvoiceModal({
                   {currentStep === 2 && (
                     <div className="space-y-4 sm:space-y-6">
                       <SelectField
-                        label="Select Client"
+                        label={Label(UserPlus, "Select Client", true)}
                         {...register("clientId")}
                         error={errors.clientId?.message}
                         options={[
@@ -360,7 +367,11 @@ export function CreateInvoiceModal({
                               <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 w-full gap-4">
                                 <div className="sm:col-span-6">
                                   <InputField
-                                    label="What are you charging for?"
+                                    label={Label(
+                                      null,
+                                      "What are you charging for?",
+                                      true
+                                    )}
                                     {...register(`items.${index}.description`)}
                                     placeholder="e.g. Logo Design, Content Writing (2 Articles), Web Development"
                                     error={
@@ -372,7 +383,11 @@ export function CreateInvoiceModal({
                                 <div className="grid grid-cols-1 gap-4 sm:col-span-6">
                                   <div className="sm:col-span-2">
                                     <InputField
-                                      label="How many units/hours?"
+                                      label={Label(
+                                        null,
+                                        "How many units/hours?",
+                                        true
+                                      )}
                                       type="number"
                                       {...register(`items.${index}.quantity`, {
                                         valueAsNumber: true,
@@ -401,7 +416,11 @@ export function CreateInvoiceModal({
                                   <div className="sm:col-span-2">
                                     <div className="relative">
                                       <InputField
-                                        label={`Rate per unit/hour (${currency})`}
+                                        label={Label(
+                                          null,
+                                          `Rate per unit/hour (${currency})`,
+                                          true
+                                        )}
                                         type="number"
                                         currencySymbol={currencySymbol}
                                         {...register(`items.${index}.rate`, {
@@ -492,42 +511,42 @@ export function CreateInvoiceModal({
                     </div>
                   )}
                 </motion.div>
+              </form>
 
-                {/* Footer Actions */}
-                <div className="flex justify-between mt-6 sm:mt-8">
+              {/* Footer Actions */}
+              <div className="p-4 sm:p-6 border-t border-gray-100 flex-shrink-0 flex justify-between">
+                <Button
+                  onClick={goToPrevStep}
+                  disabled={currentStep === 1 || isLoading}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm sm:text-base"
+                  fullWidth={false}
+                >
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Previous
+                </Button>
+
+                {currentStep < 3 ? (
                   <Button
-                    onClick={goToPrevStep}
-                    disabled={currentStep === 1 || isLoading}
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm sm:text-base"
+                    onClick={goToNextStep}
+                    disabled={isLoading}
+                    className="text-sm sm:text-base"
                     fullWidth={false}
                   >
-                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    Previous
+                    Next
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </Button>
-
-                  {currentStep < 3 ? (
-                    <Button
-                      onClick={goToNextStep}
-                      disabled={isLoading}
-                      className="text-sm sm:text-base"
-                      fullWidth={false}
-                    >
-                      Next
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      loading={isLoading}
-                      disabled={!isValid}
-                      className="text-sm sm:text-base"
-                      fullWidth={false}
-                    >
-                      Create Invoice
-                    </Button>
-                  )}
-                </div>
-              </form>
+                ) : (
+                  <Button
+                    type="submit"
+                    loading={isLoading}
+                    disabled={!isValid}
+                    className="text-sm sm:text-base"
+                    fullWidth={false}
+                  >
+                    Create Invoice
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
         </>

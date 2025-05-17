@@ -8,6 +8,19 @@ export interface InputFieldProps
 }
 j;
 
+export interface SelectFieldProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: React.ReactNode;
+  name?: string;
+  error?: string;
+  disabled?: boolean;
+  options: {
+    value: string;
+    label: string;
+  }[];
+}
+
+// Types for Registration
 export interface RegisterFormData {
   name: string;
   email: string;

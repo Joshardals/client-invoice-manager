@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { isPhoneValid } from "@/lib/utils";
+import { Label } from "../ui/Label";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -98,9 +99,6 @@ export function AddClientModal({
     [onSuccess, onClose]
   );
 
-  const labelClasses =
-    "flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2";
-
   const steps = [
     { number: 1, title: "Basic Info" },
     { number: 2, title: "Contact" },
@@ -115,18 +113,6 @@ export function AddClientModal({
         }`}
       />
     </div>
-  );
-
-  const labelWithIcon = (
-    Icon: React.ElementType,
-    text: string,
-    required?: boolean
-  ) => (
-    <span className="flex items-center">
-      <Icon className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-      {text}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </span>
   );
 
   return (
@@ -147,8 +133,8 @@ export function AddClientModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
           >
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
-              {/* Header section */}
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
+              {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 sm:gap-4">
@@ -204,7 +190,11 @@ export function AddClientModal({
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6">
+              {/* Form Content */}
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex-1 overflow-y-auto p-4 sm:p-6"
+              >
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -213,7 +203,7 @@ export function AddClientModal({
                   {currentStep === 1 && (
                     <>
                       <InputField
-                        label={labelWithIcon(UserPlus, "Full Name", true)}
+                        label={Label(UserPlus, "Full Name", true)}
                         placeholder="Enter full name"
                         disabled={isLoading}
                         {...register("fullName")}
@@ -221,7 +211,7 @@ export function AddClientModal({
                       />
 
                       <InputField
-                        label={labelWithIcon(Mail, "Email Address", true)}
+                        label={Label(Mail, "Email Address", true)}
                         type="email"
                         placeholder="Enter email address"
                         disabled={isLoading}
@@ -234,9 +224,9 @@ export function AddClientModal({
                   {currentStep === 2 && (
                     <>
                       <div>
-                        <label htmlFor="phone" className={labelClasses}>
+                        <label htmlFor="phone" className="label-classes">
                           <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Phone Number
+                          Phone Number (Optional)
                         </label>
                         <PhoneInput
                           defaultCountry="ng"
@@ -255,7 +245,7 @@ export function AddClientModal({
                       </div>
 
                       <InputField
-                        label={labelWithIcon(Building2, "Company Name")}
+                        label={Label(Building2, "Company Name (Optional)")}
                         placeholder="Enter company name"
                         disabled={isLoading}
                         {...register("company")}
@@ -267,7 +257,7 @@ export function AddClientModal({
                   {currentStep === 3 && (
                     <>
                       <InputField
-                        label={labelWithIcon(MapPin, "Address")}
+                        label={Label(MapPin, "Address (Optional)")}
                         placeholder="Enter address"
                         disabled={isLoading}
                         {...register("address")}
@@ -275,9 +265,9 @@ export function AddClientModal({
                       />
 
                       <div>
-                        <label htmlFor="notes" className={labelClasses}>
+                        <label htmlFor="notes" className="label-classes ">
                           <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                          Additional Notes
+                          Additional Notes (Optional)
                         </label>
                         <textarea
                           id="notes"
@@ -291,41 +281,42 @@ export function AddClientModal({
                     </>
                   )}
                 </motion.div>
+              </form>
 
-                <div className="flex justify-between mt-6 sm:mt-8">
+              {/* Footer Actions*/}
+              <div className="p-4 sm:p-6 border-t border-gray-100 flex-shrink-0 flex justify-between">
+                <Button
+                  onClick={() =>
+                    currentStep > 1 && setCurrentStep((step) => step - 1)
+                  }
+                  disabled={currentStep === 1 || isLoading}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  fullWidth={false}
+                >
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Previous
+                </Button>
+
+                {currentStep < 3 ? (
                   <Button
-                    onClick={() =>
-                      currentStep > 1 && setCurrentStep((step) => step - 1)
-                    }
-                    disabled={currentStep === 1 || isLoading}
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    onClick={goToNextStep}
+                    disabled={isLoading}
                     fullWidth={false}
                   >
-                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    Previous
+                    Next
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </Button>
-
-                  {currentStep < 3 ? (
-                    <Button
-                      onClick={goToNextStep}
-                      disabled={isLoading}
-                      fullWidth={false}
-                    >
-                      Next
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      loading={isLoading}
-                      disabled={!isValid}
-                      fullWidth={false}
-                    >
-                      Add Client
-                    </Button>
-                  )}
-                </div>
-              </form>
+                ) : (
+                  <Button
+                    type="submit"
+                    loading={isLoading}
+                    disabled={!isValid}
+                    fullWidth={false}
+                  >
+                    Add Client
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
         </>

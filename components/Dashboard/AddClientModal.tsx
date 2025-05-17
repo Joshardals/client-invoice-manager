@@ -111,7 +111,7 @@ export function AddClientModal({
     <div className="flex-1 h-0.5 mx-2">
       <div
         className={`h-full transition-colors duration-300 ${
-          active ? "bg-green-600" : "bg-gray-200"
+          active ? "bg-blue-500" : "bg-gray-200"
         }`}
       />
     </div>
@@ -185,7 +185,7 @@ export function AddClientModal({
                               currentStep === step.number
                                 ? "bg-blue-600 text-white"
                                 : currentStep > step.number
-                                  ? "bg-green-500 text-white"
+                                  ? "bg-blue-500 text-white"
                                   : "bg-gray-200 text-gray-600"
                             }
                           `}

@@ -130,6 +130,16 @@ export function CreateInvoiceModal({
     { number: 3, title: "Review" },
   ];
 
+  const StepConnector = ({ active }: { active: boolean }) => (
+    <div className="flex-1 h-0.5 mx-2">
+      <div
+        className={`h-full transition-colors duration-300 ${
+          active ? "bg-purple-500" : "bg-gray-200"
+        }`}
+      />
+    </div>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -187,7 +197,7 @@ export function CreateInvoiceModal({
                               currentStep === step.number
                                 ? "bg-purple-600 text-white"
                                 : currentStep > step.number
-                                  ? "bg-green-500 text-white"
+                                  ? "bg-purple-500 text-white"
                                   : "bg-gray-200 text-gray-600"
                             }
                           `}
@@ -199,16 +209,7 @@ export function CreateInvoiceModal({
                         </span>
                       </div>
                       {index < steps.length - 1 && (
-                        <div className="flex-1 h-0.5 mx-2 sm:mx-4">
-                          <div
-                            className={`h-full transition-colors duration-300 
-                              ${
-                                currentStep > step.number
-                                  ? "bg-green-500"
-                                  : "bg-gray-200"
-                              }`}
-                          />
-                        </div>
+                        <StepConnector active={currentStep > step.number} />
                       )}
                     </React.Fragment>
                   ))}

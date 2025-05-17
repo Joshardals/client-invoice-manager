@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState, FormEvent } from "react";
+import React, { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -9,12 +9,17 @@ import {
   Building2,
   MapPin,
   FileText,
+  ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
 import { ClientFormData, clientSchema } from "@/lib/form/validation";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
+import { isPhoneValid } from "@/lib/utils";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -27,13 +32,16 @@ export function AddClientModal({
   onClose,
   onSuccess,
 }: AddClientModalProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [phone, setPhone] = useState<string>("");
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
     trigger,
     formState: { errors, isValid },
+    setValue,
+    watch,
     reset,
   } = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -67,7 +75,17 @@ export function AddClientModal({
       setIsLoading(true);
       try {
         await new Promise((r) => setTimeout(r, 1000));
-        onSuccess(data);
+        // Clean up phone number - if it's just a country code, set it to empty string
+        const cleanedData = {
+          ...data,
+          phone:
+            data.phone &&
+            isPhoneValid(data.phone) &&
+            data.phone.match(/^\+\d{1,3}$/)
+              ? ""
+              : data.phone,
+        };
+        onSuccess(cleanedData);
         reset();
         setCurrentStep(1);
         onClose();
@@ -215,14 +233,26 @@ export function AddClientModal({
 
                   {currentStep === 2 && (
                     <>
-                      <InputField
-                        label={labelWithIcon(Phone, "Phone Number")}
-                        type="tel"
-                        placeholder="Enter phone number"
-                        disabled={isLoading}
-                        {...register("phone")}
-                        error={errors.phone?.message}
-                      />
+                      <div>
+                        <label htmlFor="phone" className={labelClasses}>
+                          <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                          Phone Number
+                        </label>
+                        <PhoneInput
+                          defaultCountry="ng"
+                          value={watch("phone")}
+                          onChange={(value) => {
+                            setPhone(value);
+                            setValue("phone", value);
+                          }}
+                          inputClassName="w-full px-4 py-2 text-sm border  focus:outline-none focus:ring-1 focus:ring-blue-300 "
+                        />
+                        {errors.phone && (
+                          <p className="text-xs sm:text-sm text-red-600 ">
+                            {errors.phone?.message}
+                          </p>
+                        )}
+                      </div>
 
                       <InputField
                         label={labelWithIcon(Building2, "Company Name")}
@@ -271,6 +301,7 @@ export function AddClientModal({
                     className="bg-gray-100 text-gray-700 hover:bg-gray-200"
                     fullWidth={false}
                   >
+                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Previous
                   </Button>
 
@@ -281,6 +312,7 @@ export function AddClientModal({
                       fullWidth={false}
                     >
                       Next
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                     </Button>
                   ) : (
                     <Button

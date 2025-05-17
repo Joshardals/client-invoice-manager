@@ -17,8 +17,9 @@ import { today } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { AddClientModal } from "./AddClientModal";
 import { toast } from "react-toastify";
-import { ClientFormData } from "@/lib/form/validation";
+import { ClientFormData, InvoiceFormData } from "@/lib/form/validation";
 import Button from "../ui/Button";
+import { CreateInvoiceModal } from "./CreateInvoiceModal";
 
 interface Invoice {
   id: number;
@@ -38,6 +39,8 @@ interface StatCard {
 export function Dashboard() {
   const router = useRouter();
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const [isCreateInvoiceModalOpen, setIsCreateInvoiceModalOpen] =
+    useState(false);
 
   const stats: StatCard[] = useMemo(
     () => [
@@ -147,6 +150,22 @@ export function Dashboard() {
     console.log(clientData);
   }, []);
 
+  const handleCreateInvoiceSuccess = useCallback((data: InvoiceFormData) => {
+    toast.success("Invoice created successfully");
+    console.log(data);
+    setIsCreateInvoiceModalOpen(false);
+  }, []);
+
+  // Add mock clients data (replace with your actual clients data)
+  const clients = useMemo(
+    () => [
+      { id: "1", name: "Apex Solutions" },
+      { id: "2", name: "Global Tech" },
+      { id: "3", name: "Metro Systems" },
+    ],
+    []
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -170,7 +189,7 @@ export function Dashboard() {
             </Button>
 
             <Button
-              onClick={() => setIsAddClientModalOpen(true)}
+              onClick={() => setIsCreateInvoiceModalOpen(true)}
               fullWidth={false}
             >
               <FilePlus className="w-4 h-4 mr-1.5 sm:mr-2" />
@@ -242,6 +261,13 @@ export function Dashboard() {
         isOpen={isAddClientModalOpen}
         onClose={() => setIsAddClientModalOpen(false)}
         onSuccess={handleAddClientSuccess}
+      />
+
+      <CreateInvoiceModal
+        isOpen={isCreateInvoiceModalOpen}
+        onClose={() => setIsCreateInvoiceModalOpen(false)}
+        onSubmit={handleCreateInvoiceSuccess}
+        clients={clients}
       />
     </div>
   );

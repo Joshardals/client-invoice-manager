@@ -566,6 +566,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/google-libphonenumber@^7.4.30":
+  version "7.4.30"
+  resolved "https://registry.yarnpkg.com/@types/google-libphonenumber/-/google-libphonenumber-7.4.30.tgz#a47ed8f1f237bd43edbd1c8aff24400b0fd9b2fe"
+  integrity sha512-Td1X1ayRxePEm6/jPHUBs2tT6TzW1lrVB6ZX7ViPGellyzO/0xMNi+wx5nH6jEitjznq276VGIqjK5qAju0XVw==
+
 "@types/jsonwebtoken@^9.0.9":
   version "9.0.9"
   resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-9.0.9.tgz#a4c3a446c0ebaaf467a58398382616f416345fb3"
@@ -937,6 +942,11 @@ glob@^7.1.3:
     minimatch "^3.1.1"
     once "^1.3.0"
     path-is-absolute "^1.0.0"
+
+google-libphonenumber@^3.2.40:
+  version "3.2.40"
+  resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.40.tgz#ed57d0db67a8745e8e6db7983dda7f94717fb4c9"
+  integrity sha512-bzGxX/vfggcV80LVcibki+JvR91x6zHpBpovDXSfmZUGn6uLzhbYXsWll2a80EG6qTmvf8lt7KZZ/pkMml8ckw==
 
 graceful-fs@^4.2.4:
   version "4.2.11"
@@ -1422,6 +1432,11 @@ react-hook-form@^7.56.3:
   version "7.56.3"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.56.3.tgz#c459f59fead379db30113951152e13db386cc015"
   integrity sha512-IK18V6GVbab4TAo1/cz3kqajxbDPGofdF0w7VHdCo0Nt8PrPlOZcuuDq9YYIV1BtjcX78x0XsldbQRQnQXWXmw==
+
+react-international-phone@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/react-international-phone/-/react-international-phone-4.5.0.tgz#901da544760da9b23e0a1945053cac977ff2cd97"
+  integrity sha512-wjwHv+VfiwM49B5/6El4Z5vZKmf3ILpUeiOCI9X+b0Dq4g5nL8gROcwCdVcTXywxznbDSoxSassBX3i9tPZX6g==
 
 react-promise-suspense@0.3.4:
   version "0.3.4"

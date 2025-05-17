@@ -1,4 +1,8 @@
 @import "tailwindcss";
+:root {
+  --react-international-phone-border-radius: 8px;
+  /* --react-international-phone-border-color: red; */
+}
 
 @theme inline {
   --font-sans: var(--font-geist-sans);

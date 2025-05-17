@@ -261,8 +261,8 @@ export function CreateInvoiceModal({
               </div>
 
               {/* Form Content */}
-              {/* <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6"></form> */}
               <form
+                id="invoice-form"
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex-1 overflow-y-auto p-4 sm:p-6"
               >
@@ -538,6 +538,7 @@ export function CreateInvoiceModal({
                 ) : (
                   <Button
                     type="submit"
+                    form="invoice-form"
                     loading={isLoading}
                     disabled={!isValid}
                     className="text-sm sm:text-base"

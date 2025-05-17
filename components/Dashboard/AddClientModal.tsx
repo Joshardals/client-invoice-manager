@@ -192,6 +192,7 @@ export function AddClientModal({
 
               {/* Form Content */}
               <form
+                id="add-client-form"
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex-1 overflow-y-auto p-4 sm:p-6"
               >
@@ -309,6 +310,7 @@ export function AddClientModal({
                 ) : (
                   <Button
                     type="submit"
+                    form="add-client-form"
                     loading={isLoading}
                     disabled={!isValid}
                     fullWidth={false}

@@ -14,7 +14,6 @@ import {
   RETRY_DELAY,
   statusAnimations,
 } from "@/lib/constants";
-import NavigationProgress from "../ui/NavigationProgress";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 export function LoginForm() {

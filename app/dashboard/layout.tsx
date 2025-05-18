@@ -1,3 +1,5 @@
+import { DashboardContent } from "@/components/Dashboard/DashboaordContent";
+import { Sidebar } from "@/components/Dashboard/Sidebar";
 import { getAuthSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -9,5 +11,10 @@ export default async function DashboardLayout({
   const session = await getAuthSession();
 
   if (!session) redirect("/login");
-  return <section>{children}</section>;
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar />
+      <DashboardContent>{children}</DashboardContent>
+    </div>
+  );
 }

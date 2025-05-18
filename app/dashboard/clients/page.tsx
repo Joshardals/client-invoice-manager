@@ -124,48 +124,46 @@ export default function ClientsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          <span className="text-sm">Back</span>
-        </button>
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      {/* Back Button */}
+      <button
+        onClick={handleBack}
+        className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        <span className="text-sm">Back</span>
+      </button>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-              All Clients
-            </h1>
-            <p className="mt-1 text-xs sm:text-sm text-gray-600">
-              Showing {filteredClients().length} Clients
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            All Clients
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-gray-600">
+            Showing {filteredClients().length} Clients
+          </p>
         </div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 sm:h-5 w-4 sm:w-5" />
-          <input
-            type="text"
-            placeholder="Search by name or company..."
-            className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
-
-        {/* Clients Table */}
-        <Table
-          data={filteredClients()}
-          columns={columns}
-          actions={actionButtons}
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 sm:h-5 w-4 sm:w-5" />
+        <input
+          type="text"
+          placeholder="Search by name or company..."
+          className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          value={searchTerm}
+          onChange={handleSearch}
         />
       </div>
+
+      {/* Clients Table */}
+      <Table
+        data={filteredClients()}
+        columns={columns}
+        actions={actionButtons}
+      />
     </div>
   );
 }

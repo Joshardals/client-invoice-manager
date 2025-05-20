@@ -214,13 +214,13 @@ export function Dashboard() {
             >
               <div className="flex items-center">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
-                  <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <stat.icon className="w-5 h-5 xs:w-6 xs:h-6 text-white" />
                 </div>
                 <div className="ml-3 sm:ml-4">
-                  {/* text-xs sm:text-sm */}
-                  <p className="text-sm text-gray-600">{stat.title}</p>
-                  {/* text-lg sm:text-xl  */}
-                  <p className="text-xl lg:text-2xl font-semibold text-gray-900">
+                  <p className="text-xs xs:text-sm text-gray-600">
+                    {stat.title}
+                  </p>
+                  <p className="text-lg xs:text-xl lg:text-2xl font-semibold text-gray-900">
                     {stat.value}
                   </p>
                 </div>

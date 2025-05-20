@@ -55,7 +55,8 @@ function MobileMenuButton({
   isOpen: boolean;
 }) {
   return (
-    <div className="lg:hidden fixed top-0 left-0 right-0 bg-gray-50 p-4 sm:px-6 z-30 border-b shadow-sm">
+    //I removed border-b from the div below
+    <div className="lg:hidden fixed top-0 left-0 right-0 bg-gray-50 p-4 sm:px-6 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center">
         <button
           onClick={onClick}
@@ -139,7 +140,6 @@ function SidebarNav({ isOpen }: { isOpen: boolean }) {
 }
 
 export function Sidebar() {
-  const pathname = usePathname();
   const isOpen = useSidebarStore((state) => state.isOpen);
   const toggleSidebar = useSidebarStore((state) => state.toggle);
   const { isMobileOpen, close, toggle } = useMobileSidebar();

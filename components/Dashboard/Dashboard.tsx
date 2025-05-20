@@ -173,9 +173,11 @@ export function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            {/* text-xl sm:text-2xl */}
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
               Welcome back, Joshua
             </h1>
+            {/* text-xs sm:text-sm */}
             <p className="mt-1 text-sm text-gray-600">{today}</p>
           </div>
 

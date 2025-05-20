@@ -42,8 +42,9 @@ const menuItems = [
   },
 ];
 
+// text-sm sm:text-base
 const baseLinkClasses =
-  "flex items-center p-3 rounded-lg transition-colors hover:bg-gray-800 cursor-pointer text-sm sm:text-base";
+  "flex items-center p-3 rounded-lg transition-colors hover:bg-gray-800 cursor-pointer text-base";
 const baseIconClasses = "size-5 lg:size-6 text-gray-400 group-hover:text-white";
 const activeLinkClasses = "bg-gray-800 text-white";
 
@@ -217,7 +218,7 @@ export function Sidebar() {
               <SidebarNav isOpen={true} />
 
               {/* Mobile Logout */}
-              <div className="p-4 border-t border-gray-800">
+              <div className="py-4 px-2 border-t border-gray-800">
                 <button
                   onClick={handleLogout}
                   className="flex items-center w-full px-3 py-3 text-sm text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-gray-800 transition-colors"

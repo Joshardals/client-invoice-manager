@@ -13,7 +13,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
     <main
       className={`flex-1 ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"} transition-all duration-300 p-4 sm:p-6 lg:p-8`}
     >
-      {children}
+      <div className="pt-16 lg:pt-0">{children}</div>
     </main>
   );
 }

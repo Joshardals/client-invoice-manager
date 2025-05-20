@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useTransition } from "react";
+import React, { useCallback, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -18,6 +18,8 @@ import { MobileLogo } from "../shared/MobileLogo";
 import { LogoutButton } from "../auth/LogoutButton";
 import { signOut } from "next-auth/react";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
+import { useAutoCloseSidebar } from "@/lib/hooks/useAutoCloseSidebar";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -30,7 +32,7 @@ const baseLinkClasses =
 const baseIconClasses = "size-5 lg:size-6 text-gray-400 group-hover:text-white";
 const activeLinkClasses = "bg-gray-800 text-white";
 
-function MenuButton({
+function MobileMenuButton({
   onClick,
   isOpen,
 }: {
@@ -38,13 +40,32 @@ function MenuButton({
   isOpen: boolean;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className="p-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800"
-      aria-label={isOpen ? "Close menu" : "Open menu"}
-    >
-      {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-    </button>
+    <div className="lg:hidden fixed top-0 left-0 right-0 bg-gray-50 p-4 sm:px-6 z-30 border-b">
+      <div className="max-w-7xl mx-auto flex items-center">
+        <button
+          onClick={onClick}
+          className="p-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+        >
+          <Menu className="size-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SidebarHeader({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3">
+      <MobileLogo />
+      <button
+        onClick={onClose}
+        className="rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors duration-200 -mr-2"
+        aria-label="Close sidebar"
+      >
+        <X className="size-5" />
+      </button>
+    </div>
   );
 }
 
@@ -52,17 +73,14 @@ function SidebarLink({
   item,
   isOpen,
   isActive,
-  onClick,
 }: {
   item: (typeof menuItems)[0];
   isOpen: boolean;
   isActive: boolean;
-  onClick?: () => void;
 }) {
   return (
     <Link
       href={item.path}
-      onClick={onClick}
       className={`${baseLinkClasses} ${
         isOpen ? "" : "justify-center"
       } ${isActive ? activeLinkClasses : "text-gray-300"}`}
@@ -78,7 +96,6 @@ function SidebarLink({
 function SidebarNav({
   isOpen,
   isPathActive,
-  onLinkClick,
 }: {
   isOpen: boolean;
   isPathActive: (path: string) => boolean;
@@ -92,7 +109,6 @@ function SidebarNav({
           item={item}
           isOpen={isOpen}
           isActive={isPathActive(item.path)}
-          onClick={onLinkClick}
         />
       ))}
     </nav>
@@ -111,6 +127,8 @@ export function Sidebar() {
   const [isPending, startTransition] = useTransition();
   const isHydrated = useSidebarStore((state) => state.hasHydrated);
   const router = useRouter();
+  useLockBodyScroll(isMobileOpen);
+  useAutoCloseSidebar(close);
 
   const handleLogout = useCallback(() => {
     startTransition(() => {
@@ -124,9 +142,13 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <MenuButton onClick={toggle} isOpen={isMobileOpen} />
-      </div>
+      {!isMobileOpen && (
+        <div className="lg:hidden fixed top-4 left-4 z-30">
+          {!isMobileOpen && (
+            <MobileMenuButton onClick={toggle} isOpen={false} />
+          )}
+        </div>
+      )}
 
       {/* Sidebar Desktop */}
       <div
@@ -165,10 +187,10 @@ export function Sidebar() {
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={close}
-              className="fixed inset-0 bg-black z-30 lg:hidden"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden"
             />
             <motion.div
               initial={{ x: "-100%" }}
@@ -177,15 +199,8 @@ export function Sidebar() {
               transition={{ type: "tween" }}
               className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-40 lg:hidden flex flex-col pt-4 sm:pt-6 space-y-4"
             >
-              <div className="flex items-center px-6 ">
-                <MobileLogo />
-              </div>
-
-              <SidebarNav
-                isOpen={true}
-                isPathActive={isPathActive}
-                onLinkClick={close}
-              />
+              <SidebarHeader onClose={close} />
+              <SidebarNav isOpen={true} isPathActive={isPathActive} />
 
               {/* Mobile Logout */}
               <div className="p-4 border-t border-gray-800">

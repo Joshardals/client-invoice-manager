@@ -16,10 +16,8 @@ import {
   RETRY_DELAY,
   statusAnimations,
 } from "@/lib/constants";
-import NavigationProgress from "../ui/NavigationProgress";
 import { Status } from "@/typings";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
-import { AlertCircle, CheckCircle } from "lucide-react";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
@@ -171,12 +169,6 @@ export function ForgotPasswordForm() {
                     : "bg-red-50 text-red-700"
                 } text-xs xs:text-sm`}
               >
-                {/* {status.type === "success" && (
-                  <CheckCircle className="size-3 xs:size-4 mr-1.5 sm:mr-2" />
-                )}
-                {status.type === "error" && (
-                  <AlertCircle className="size-3 xs:size-4 mr-1.5 sm:mr-2" />
-                )} */}
                 {status.message}
               </motion.div>
             )}

@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, AlertCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { useVerificationTimer } from "@/lib/hooks/useVerificationTimer";
 import { useResendCooldown } from "@/lib/hooks/useResendCooldown";
@@ -263,12 +262,6 @@ export function VerifyEmailForm({
                         : "bg-gray-50 text-gray-700"
                 } text-xs xs:text-sm`}
               >
-                {/* {status.type === "success" && (
-                  <CheckCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
-                )}
-                {status.type === "error" && (
-                  <AlertCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
-                )} */}
                 {status.message}
               </motion.div>
             )}

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 import {
@@ -238,12 +238,6 @@ export function ResetPasswordForm({ token }: { token: string }) {
                       : "bg-blue-50 text-blue-700"
                 } text-xs xs:text-sm flex items-center`}
               >
-                {/* {status.type === "success" && (
-                  <CheckCircle className="size-3 xs:size-4 mr-1.5 sm:mr-2" />
-                )}
-                {status.type === "error" && (
-                  <AlertCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
-                )} */}
                 {status.message}
               </motion.div>
             )}

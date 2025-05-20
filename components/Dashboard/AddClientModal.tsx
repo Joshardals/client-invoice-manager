@@ -135,33 +135,33 @@ export function AddClientModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
           >
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
+            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] xs:max-h-[90vh]  flex flex-col">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="bg-blue-100 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                      <UserPlus className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                  <div className="flex items-center gap-3 xs:gap-4">
+                    <div className="bg-blue-100 p-2 sm:p-3 rounded-lg xs:rounded-xl">
+                      <UserPlus className="size-5 xs:size-6 text-blue-600" />
                     </div>
                     <div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                      <h2 className="text-xl xs:text-2xl font-bold text-gray-900">
                         Add New Client
                       </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                      <p className="text-xs xs:text-sm text-gray-500 mt-0.5 xs:mt-1">
                         Enter client details below
                       </p>
                     </div>
                   </div>
                   <Button
                     onClick={onClose}
-                    className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors"
+                    className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg xs:rounded-xl transition-colors"
                     fullWidth={false}
                   >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                    <X className="size-4 xs:size-5 text-gray-500" />
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between mt-4 sm:mt-6 px-2">
+                <div className="flex items-center justify-between mt-4 xs:mt-6 px-2">
                   {steps.map((step, index) => (
                     <React.Fragment key={step.number}>
                       <div className="flex items-center">
@@ -201,7 +201,7 @@ export function AddClientModal({
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4 sm:space-y-6"
+                  className="space-y-4 xs:space-y-6"
                 >
                   {currentStep === 1 && (
                     <>
@@ -228,7 +228,7 @@ export function AddClientModal({
                     <>
                       <div>
                         <label htmlFor="phone" className="label-classes">
-                          <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                          <Phone className="size-3 xs:size-4 mr-2" />
                           Phone Number (Optional)
                         </label>
                         <PhoneInput
@@ -238,10 +238,10 @@ export function AddClientModal({
                             setPhone(value);
                             setValue("phone", value);
                           }}
-                          inputClassName="w-full px-4 py-2 text-sm border  focus:outline-none focus:ring-1 focus:ring-blue-300 "
+                          inputClassName="w-full px-4 py-2 text-sm border  focus:outline-none focus:ring-1 focus:ring-blue-300 text-xl"
                         />
                         {errors.phone && (
-                          <p className="text-xs sm:text-sm text-red-600 ">
+                          <p className="text-xs xs:text-sm text-red-600 ">
                             {errors.phone?.message}
                           </p>
                         )}
@@ -269,12 +269,12 @@ export function AddClientModal({
 
                       <div>
                         <label htmlFor="notes" className="label-classes ">
-                          <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                          <FileText className="size-3 xs:size-4 mr-2" />
                           Additional Notes (Optional)
                         </label>
                         <textarea
                           id="notes"
-                          className="w-full px-3 py-2 sm:px-4 bg-gray-50 border-0 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm sm:text-base resize-none"
+                          className="w-full px-3 py-2 sm:px-4 bg-gray-50 border-0 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm xs:text-base resize-none"
                           rows={4}
                           placeholder="Enter any additional notes"
                           {...register("notes")}
@@ -296,7 +296,7 @@ export function AddClientModal({
                   className="bg-gray-100 text-gray-700 hover:bg-gray-200"
                   fullWidth={false}
                 >
-                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  <ArrowLeft className="size-4 xs:size-5 mr-2" />
                   Previous
                 </Button>
 
@@ -307,7 +307,7 @@ export function AddClientModal({
                     fullWidth={false}
                   >
                     Next
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                    <ArrowRight className="size-4 xs:size-5 ml-2" />
                   </Button>
                 ) : (
                   <Button

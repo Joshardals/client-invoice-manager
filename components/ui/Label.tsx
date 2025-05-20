@@ -5,7 +5,7 @@ export function Label(
 ) {
   return (
     <span className="flex items-center">
-      {Icon && <Icon className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />}
+      {Icon && <Icon className="size-3 xs:size-4 mr-2" />}
       {text}
       {required && <span className="text-red-500 ml-1">*</span>}
     </span>

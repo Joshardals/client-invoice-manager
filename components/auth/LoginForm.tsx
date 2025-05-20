@@ -154,7 +154,7 @@ export function LoginForm() {
     <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-6 xs:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 xs:space-y-8 bg-white p-4 xs:p-6 md:p-8 rounded-xl shadow-lg"
       >
         <div className="space-y-1 xs:space-y-2">
           <h1 className="text-2xl xs:text-3xl font-bold text-gray-900">
@@ -206,7 +206,7 @@ export function LoginForm() {
               <motion.div
                 key="error"
                 {...statusAnimations}
-                className="p-2 sm:p-3 rounded-lg bg-red-50 text-red-700 text-xs xs:text-sm"
+                className="p-2 xs:p-3 rounded-lg bg-red-50 text-red-700 text-xs xs:text-sm"
               >
                 {error}
               </motion.div>

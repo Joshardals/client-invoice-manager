@@ -17,6 +17,7 @@ const Button = ({
   children,
   ...props
 }: ButtonProps) => {
+  // px-3 sm:px-4
   const baseStyles =
     "flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none cursor-pointer select-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm min-[320px]:text-base";
 

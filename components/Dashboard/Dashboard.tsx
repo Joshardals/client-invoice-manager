@@ -217,10 +217,10 @@ export function Dashboard() {
                   <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="ml-3 sm:ml-4">
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+                  {/* text-xs sm:text-sm */}
+                  <p className="text-sm text-gray-600">{stat.title}</p>
+                  {/* text-lg sm:text-xl  */}
+                  <p className="text-xl lg:text-2xl font-semibold text-gray-900">
                     {stat.value}
                   </p>
                 </div>

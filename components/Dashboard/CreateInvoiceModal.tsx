@@ -203,20 +203,19 @@ export function CreateInvoiceModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
           >
-            {/* <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh] overflow-auto"> */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
+            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 xs:gap-4">
                     <div className="bg-purple-100 p-2 sm:p-3 rounded-lg">
-                      <Receipt className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                      <Receipt className="size-5 xs:size-6 text-purple-600" />
                     </div>
                     <div>
-                      <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
+                      <h2 className="text-lg xs:text-2xl font-bold text-gray-900">
                         Create Invoice
                       </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                      <p className="text-xs xs:text-sm text-gray-500 mt-0.5 xs:mt-1">
                         Generate a new invoice for your client
                       </p>
                     </div>
@@ -226,19 +225,19 @@ export function CreateInvoiceModal({
                     className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors"
                     fullWidth={false}
                   >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                    <X className="w-4 h-4 xs:size-5 text-gray-500" />
                   </Button>
                 </div>
 
                 {/* Progress Steps */}
-                <div className="flex items-center justify-between mt-4 sm:mt-6 px-2">
+                <div className="flex items-center justify-between mt-4 xs:mt-6 px-2">
                   {steps.map((step, index) => (
                     <React.Fragment key={step.number}>
                       <div className="flex items-center">
                         <div
                           className={`
-                            flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full
-                            text-xs sm:text-sm font-medium transition-colors duration-300
+                            flex items-center justify-center size-6 xs:size-8 rounded-full
+                            text-xs xs:text-sm font-medium transition-colors duration-300
                             ${
                               currentStep === step.number
                                 ? "bg-purple-600 text-white"
@@ -250,7 +249,7 @@ export function CreateInvoiceModal({
                         >
                           {step.number}
                         </div>
-                        <span className="hidden sm:block ml-3 text-xs sm:text-sm font-medium text-gray-600">
+                        <span className="hidden sm:block ml-3 text-xs xs:text-sm font-medium text-gray-600">
                           {step.title}
                         </span>
                       </div>
@@ -271,10 +270,10 @@ export function CreateInvoiceModal({
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4 sm:space-y-6"
+                  className="space-y-4 xs:space-y-6"
                 >
                   {currentStep === 1 && (
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-4 xs:space-y-6">
                       <InputField
                         label={Label(FileText, "Invoice Title", true)}
                         {...register("title")}
@@ -322,7 +321,7 @@ export function CreateInvoiceModal({
                   )}
 
                   {currentStep === 2 && (
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-4 xs:space-y-6">
                       <SelectField
                         label={Label(UserPlus, "Select Client", true)}
                         {...register("clientId")}
@@ -337,7 +336,7 @@ export function CreateInvoiceModal({
                       />
 
                       <div className="space-y-4">
-                        <div className="bg-blue-50 p-4 rounded-lg text-xs sm:text-sm text-blue-700">
+                        <div className="bg-blue-50 p-4 rounded-lg text-xs xs:text-sm text-blue-700">
                           Add items you're billing for. Each item should include
                           what you're charging for, how many units/hours, and
                           the rate per unit/hour.
@@ -451,10 +450,10 @@ export function CreateInvoiceModal({
                                     )}
                                   </div>
                                   <div className="sm:col-span-2">
-                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-xs xs:text-sm font-medium text-gray-700 mb-2">
                                       Line Total
                                     </label>
-                                    <div className="flex items-center py-2 px-3 sm:px-4 bg-gray-50 rounded-lg text-sm sm:text-base">
+                                    <div className="flex items-center py-2 px-3 sm:px-4 bg-gray-50 rounded-lg text-sm xs:text-base">
                                       {formatAmount(
                                         (watchedItems[index]?.quantity || 0) *
                                           (watchedItems[index]?.rate || 0)
@@ -471,7 +470,7 @@ export function CreateInvoiceModal({
                                 className="bg-red-100 hover:bg-red-200 p-2 rounded-lg"
                                 fullWidth={false}
                               >
-                                <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+                                <Minus className="size-4 xs:size-5 text-red-600" />
                               </Button>
                             </div>
                           );
@@ -479,22 +478,22 @@ export function CreateInvoiceModal({
 
                         <Button
                           onClick={handleAddItem}
-                          className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm sm:text-base"
+                          className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm xs:text-base"
                           fullWidth={false}
                         >
-                          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                          <Plus className="size-4 xs:size-5 mr-2" />
                           Add Another Item
                         </Button>
                       </div>
 
-                      <div className="flex justify-end text-lg sm:text-xl font-bold">
+                      <div className="flex justify-end text-lg xs:text-xl font-bold">
                         Total: {formatAmount(grandTotal, watch("currency"))}
                       </div>
                     </div>
                   )}
 
                   {currentStep === 3 && (
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-4 xs:space-y-6">
                       <InvoiceSummary
                         invoiceData={{
                           title: watch("title"),
@@ -520,10 +519,10 @@ export function CreateInvoiceModal({
                 <Button
                   onClick={goToPrevStep}
                   disabled={currentStep === 1 || isLoading}
-                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm sm:text-base"
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm xs:text-base"
                   fullWidth={false}
                 >
-                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  <ArrowLeft className="size-4 xs:size-5 mr-2" />
                   Previous
                 </Button>
 
@@ -531,11 +530,11 @@ export function CreateInvoiceModal({
                   <Button
                     onClick={goToNextStep}
                     disabled={isLoading}
-                    className="text-sm sm:text-base"
+                    className="text-sm xs:text-base"
                     fullWidth={false}
                   >
                     Next
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                    <ArrowRight className="size-4 xs:size-5 ml-2" />
                   </Button>
                 ) : (
                   <Button
@@ -543,7 +542,7 @@ export function CreateInvoiceModal({
                     form="invoice-form"
                     loading={isLoading}
                     disabled={!isValid}
-                    className="text-sm sm:text-base"
+                    className="text-sm xs:text-base"
                     fullWidth={false}
                   >
                     Create Invoice

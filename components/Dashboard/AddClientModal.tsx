@@ -135,7 +135,7 @@ export function AddClientModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
           >
-            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] xs:max-h-[90vh]  flex flex-col">
+            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">

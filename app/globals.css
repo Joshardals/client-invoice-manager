@@ -1,6 +1,7 @@
 @import "tailwindcss";
 :root {
   --react-international-phone-border-radius: 8px;
+  --react-international-phone-font-size: 16px;
 }
 
 @theme inline {

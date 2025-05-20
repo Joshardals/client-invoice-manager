@@ -15,7 +15,8 @@ export function MobileLogo({
         <span className="text-xl font-bold text-white select-none">I</span>
       </div>
       {/* text-xl sm:text-2xl */}
-      <span className="text-2xl ml-3 font-semibold  text-white select-none">
+      {/* Maybe in future and I want to consider adjusting my fonts to detail: max-[320px]:text-xl */}
+      <span className=" text-2xl ml-3 font-semibold  text-white select-none">
         {label}
       </span>
     </div>

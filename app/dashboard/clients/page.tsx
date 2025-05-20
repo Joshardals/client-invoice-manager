@@ -96,24 +96,24 @@ export default function ClientsPage() {
   ];
 
   const actionButtons = (client: Client) => (
-    <div className="flex space-x-1 sm:space-x-2">
+    <div className="flex space-x-1 xs:space-x-2">
       <button
         onClick={() => handleView(client.id)}
         className="text-blue-600 hover:text-blue-800"
       >
-        <Eye className="h-4 sm:h-5 w-4 sm:w-5" />
+        <Eye className="size-4 xs:size-5" />
       </button>
       <button
         onClick={() => handleEdit(client.id)}
         className="text-yellow-600 hover:text-yellow-800"
       >
-        <Edit2 className="h-4 sm:h-5 w-4 sm:w-5" />
+        <Edit2 className="size-4 xs:size-5" />
       </button>
       <button
         onClick={() => handleDelete(client.id)}
         className="text-red-600 hover:text-red-800"
       >
-        <Trash2 className="h-4 sm:h-5 w-4 sm:w-5" />
+        <Trash2 className="size-4 xs:size-5" />
       </button>
     </div>
   );
@@ -123,10 +123,10 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+          <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">
             All Clients
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-gray-600">
+          <p className="mt-1 text-xs xs:text-sm text-gray-600">
             Showing {filteredClients().length} Clients
           </p>
         </div>
@@ -138,7 +138,7 @@ export default function ClientsPage() {
         <input
           type="text"
           placeholder="Search by name or company..."
-          className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2 text-sm xs:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           value={searchTerm}
           onChange={handleSearch}
         />

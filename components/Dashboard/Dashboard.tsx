@@ -173,10 +173,10 @@ export function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
               Welcome back, Joshua
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-gray-600">{today}</p>
+            <p className="mt-1 text-sm text-gray-600">{today}</p>
           </div>
 
           {/* Quick Actions */}

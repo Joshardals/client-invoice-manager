@@ -17,7 +17,6 @@ import { Logo } from "../shared/Logo";
 import { MobileLogo } from "../shared/MobileLogo";
 import { LogoutButton } from "../auth/LogoutButton";
 import { signOut } from "next-auth/react";
-import NavigationProgress from "../ui/NavigationProgress";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 const menuItems = [
@@ -27,8 +26,8 @@ const menuItems = [
 ];
 
 const baseLinkClasses =
-  "flex items-center px-3 py-3 rounded-lg transition-colors hover:bg-gray-800 cursor-pointer";
-const baseIconClasses = "w-6 h-6 text-gray-400 group-hover:text-white";
+  "flex items-center p-3 rounded-lg transition-colors hover:bg-gray-800 cursor-pointer text-sm sm:text-base";
+const baseIconClasses = "size-5 lg:size-6 text-gray-400 group-hover:text-white";
 const activeLinkClasses = "bg-gray-800 text-white";
 
 function MenuButton({
@@ -135,9 +134,9 @@ export function Sidebar() {
           isOpen ? "w-64" : "w-20"
         }`}
       >
-        <div className="flex flex-col flex-1 bg-gray-900 text-white">
+        <div className="flex flex-col flex-1 bg-gray-900 text-white pt-8 space-y-6">
           {/* Logo */}
-          <div className="h-16 flex items-center justify-center">
+          <div className=" flex items-center justify-center ">
             <Logo isOpen={isOpen} />
           </div>
 
@@ -176,9 +175,9 @@ export function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween" }}
-              className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-40 lg:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-40 lg:hidden flex flex-col pt-4 sm:pt-6 space-y-4"
             >
-              <div className="h-16 flex items-center px-6">
+              <div className="flex items-center px-6 ">
                 <MobileLogo />
               </div>
 
@@ -192,9 +191,9 @@ export function Sidebar() {
               <div className="p-4 border-t border-gray-800">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-3 py-3 text-red-400 hover:text-red-300 rounded-lg hover:bg-gray-800 transition-colors"
+                  className="flex items-center w-full px-3 py-3 text-sm text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-gray-800 transition-colors"
                 >
-                  <LogOut className="w-6 h-6" />
+                  <LogOut className="size-5" />
                   <span className="ml-3">Logout</span>
                 </button>
               </div>

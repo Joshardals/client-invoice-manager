@@ -125,15 +125,6 @@ export default function ClientsPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      {/* Back Button */}
-      <button
-        onClick={handleBack}
-        className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        <span className="text-sm">Back</span>
-      </button>
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>

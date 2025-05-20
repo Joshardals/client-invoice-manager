@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 import {
@@ -17,7 +17,6 @@ import {
   RETRY_DELAY,
   statusAnimations,
 } from "@/lib/constants";
-import NavigationProgress from "../ui/NavigationProgress";
 import { Status } from "@/typings";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 
@@ -195,20 +194,20 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 xs:space-y-8 bg-white p-4 xs:p-6 md:p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-1 sm:space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <div className="space-y-1 xs:space-y-2">
+          <h1 className="text-2xl xs:text-3xl font-bold text-gray-900">
             Reset Password
           </h1>
-          <p className="text-xs sm:text-sm text-gray-600">
+          <p className="text-xs xs:text-sm text-gray-600">
             Please enter your new password below.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 sm:space-y-6"
+          className="space-y-4 xs:space-y-6"
           noValidate
         >
           <InputField
@@ -231,16 +230,19 @@ export function ResetPasswordForm({ token }: { token: string }) {
             {status.message && (
               <motion.div
                 {...statusAnimations}
-                className={`p-2 sm:p-3 rounded-lg ${
+                className={`p-2 xs:p-3 rounded-lg ${
                   status.type === "success"
                     ? "bg-green-50 text-green-700"
                     : status.type === "error"
                       ? "bg-red-50 text-red-700"
                       : "bg-blue-50 text-blue-700"
-                } text-xs sm:text-sm flex items-center`}
+                } text-xs xs:text-sm flex items-center`}
               >
                 {status.type === "success" && (
-                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <CheckCircle className="size-3 xs:size-4 mr-1.5 sm:mr-2" />
+                )}
+                {status.type === "error" && (
+                  <AlertCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
                 )}
                 {status.message}
               </motion.div>

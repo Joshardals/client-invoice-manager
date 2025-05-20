@@ -219,9 +219,10 @@ export function Sidebar() {
 
               {/* Mobile Logout */}
               <div className="py-4 px-2 border-t border-gray-800">
+                {/* text-sm */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-3 py-3 text-sm text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-gray-800 transition-colors"
+                  className="flex items-center w-full px-3 py-3 text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   <LogOut className="size-5" />
                   <span className="ml-3">Logout</span>

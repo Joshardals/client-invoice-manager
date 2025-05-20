@@ -26,7 +26,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       <div className="space-y-2.5">
         <label
           htmlFor={name}
-          className="block text-xs sm:text-sm font-medium text-gray-700"
+          className="block text-xs xs:text-sm font-medium text-gray-700"
         >
           {label}
         </label>
@@ -41,7 +41,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               isPassword || isDate ? "pr-10" : "pr-3"
             } ${
               isCurrency ? "pl-7 sm:pl-8" : ""
-            } text-sm sm:text-base border rounded-lg outline-none focus:ring-1 transition-all ${
+            } text-sm xs:text-base border rounded-lg outline-none focus:ring-1 transition-all ${
               error
                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                 : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -80,7 +80,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             />
           )}
         </div>
-        {error && <p className="text-xs sm:text-sm text-red-600">{error}</p>}
+        {error && <p className="text-xs xs:text-sm text-red-600">{error}</p>}
         {hintText && isPassword && !error && (
           <p className="text-xs text-gray-500">{hintText}</p>
         )}

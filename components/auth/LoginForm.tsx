@@ -154,20 +154,20 @@ export function LoginForm() {
     <>
       <motion.div
         {...formAnimations}
-        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
+        className="w-full max-w-md space-y-6 xs:space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg"
       >
-        <div className="space-y-1 sm:space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <div className="space-y-1 xs:space-y-2">
+          <h1 className="text-2xl xs:text-3xl font-bold text-gray-900">
             Welcome Back
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm xs:text-base text-gray-600">
             Sign in to continue managing your business
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 sm:space-y-6"
+          className="space-y-4 xs:space-y-6"
           noValidate
           aria-label="Login form"
         >
@@ -195,7 +195,7 @@ export function LoginForm() {
               type="button"
               onClick={handleForgotPasswordNavigation}
               disabled={isLoading}
-              className="text-xs sm:text-sm my-1 text-blue-600 hover:text-blue-500 cursor-pointer float-right focus:outline-none disabled:opacity-50"
+              className="text-xs xs:text-sm my-1 text-blue-600 hover:text-blue-500 cursor-pointer float-right focus:outline-none disabled:opacity-50"
             >
               Forgot password?
             </button>
@@ -206,7 +206,7 @@ export function LoginForm() {
               <motion.div
                 key="error"
                 {...statusAnimations}
-                className="p-2 sm:p-3 rounded-lg bg-red-50 text-red-700 text-xs sm:text-sm"
+                className="p-2 sm:p-3 rounded-lg bg-red-50 text-red-700 text-xs xs:text-sm"
               >
                 {error}
               </motion.div>
@@ -222,13 +222,13 @@ export function LoginForm() {
           </Button>
         </form>
 
-        <p className="text-center text-xs sm:text-sm text-gray-600">
+        <p className="text-center text-xs xs:text-sm text-gray-600">
           Don't have an account?{" "}
           <button
             type="button"
             onClick={handleRegisterNavigation}
             disabled={isLoading}
-            className="link-btn text-xs sm:text-sm"
+            className="link-btn text-xs xs:text-sm"
           >
             Create an account
           </button>

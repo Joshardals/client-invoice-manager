@@ -208,7 +208,7 @@ export function Dashboard() {
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+              className="bg-white p-4 xs:p-6 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
               whileHover={{ scale: 1.02 }}
               onClick={() => handleStatsClick(stat.title)}
             >
@@ -216,7 +216,7 @@ export function Dashboard() {
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                   <stat.icon className="w-5 h-5 xs:w-6 xs:h-6 text-white" />
                 </div>
-                <div className="ml-3 sm:ml-4">
+                <div className="ml-3 xs:ml-4">
                   <p className="text-xs xs:text-sm text-gray-600">
                     {stat.title}
                   </p>
@@ -232,10 +232,10 @@ export function Dashboard() {
         {/* Recent Invoices */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+            <h2 className="text-lg xs:text-xl lg:text-2xl font-semibold text-gray-900">
               Recent Invoices
             </h2>
-            <button className="flex items-center text-blue-600 hover:text-blue-700 text-sm sm:text-base">
+            <button className="flex items-center text-blue-600 hover:text-blue-700 text-sm xs:text-base">
               <FileSearch className="w-4 h-4 mr-1.5 sm:mr-2" />
               View All
             </button>

@@ -88,11 +88,6 @@ export default function ClientsPage() {
     );
   }, []);
 
-  const handleBack = useCallback(() => {
-    console.log("Navigate back");
-    router.back();
-  }, []);
-
   const columns: TableColumn<Client>[] = [
     { header: "Full Name", accessor: "name" as keyof Client },
     { header: "Email", accessor: "email" as keyof Client },

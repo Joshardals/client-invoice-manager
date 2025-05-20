@@ -238,12 +238,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
                       : "bg-blue-50 text-blue-700"
                 } text-xs xs:text-sm flex items-center`}
               >
-                {status.type === "success" && (
+                {/* {status.type === "success" && (
                   <CheckCircle className="size-3 xs:size-4 mr-1.5 sm:mr-2" />
                 )}
                 {status.type === "error" && (
                   <AlertCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
-                )}
+                )} */}
                 {status.message}
               </motion.div>
             )}

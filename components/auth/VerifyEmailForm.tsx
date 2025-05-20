@@ -263,12 +263,12 @@ export function VerifyEmailForm({
                         : "bg-gray-50 text-gray-700"
                 } text-xs xs:text-sm`}
               >
-                {status.type === "success" && (
+                {/* {status.type === "success" && (
                   <CheckCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
                 )}
                 {status.type === "error" && (
                   <AlertCircle className="size-3 xs:size-4  mr-1.5 sm:mr-2" />
-                )}
+                )} */}
                 {status.message}
               </motion.div>
             )}

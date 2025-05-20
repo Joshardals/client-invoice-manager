@@ -173,12 +173,11 @@ export function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            {/* text-xl sm:text-2xl */}
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">
               Welcome back, Joshua
             </h1>
-            {/* text-xs sm:text-sm */}
-            <p className="mt-1 text-sm text-gray-600">{today}</p>
+
+            <p className="mt-1 text-xs xs:text-sm text-gray-600">{today}</p>
           </div>
 
           {/* Quick Actions */}
@@ -244,15 +243,15 @@ export function Dashboard() {
         </div>
 
         {/* Notifications */}
-        <div className="fixed hidden bottom-4 right-4">
+        <div className="fixed  bottom-4 right-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200"
           >
             <div className="flex items-center text-yellow-600">
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-              <p className="text-xs sm:text-sm">
+              <Bell className="size-5 xs:sizee-5 mr-1.5 sm:mr-2" />
+              <p className="text-xs xs:text-sm">
                 Invoice to Global Tech is overdue
               </p>
             </div>

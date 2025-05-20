@@ -212,7 +212,7 @@ export function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.25 }}
-              className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-40 lg:hidden flex flex-col pt-4 sm:pt-6 space-y-4"
+              className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-40 lg:hidden flex flex-col pt-4  space-y-4"
             >
               <SidebarHeader onClose={close} />
               <SidebarNav isOpen={true} />

@@ -14,7 +14,8 @@ export function MobileLogo({
       <div className="size-10 bg-blue-500 rounded-xl flex items-center justify-center">
         <span className="text-xl font-bold text-white select-none">I</span>
       </div>
-      <span className="text-xl sm:text-2xl ml-3 font-semibold  text-white select-none">
+      {/* text-xl sm:text-2xl */}
+      <span className="text-2xl ml-3 font-semibold  text-white select-none">
         {label}
       </span>
     </div>

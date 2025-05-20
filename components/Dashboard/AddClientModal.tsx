@@ -34,7 +34,7 @@ export function AddClientModal({
   onClose,
   onSuccess,
 }: AddClientModalProps) {
-  // useLockBodyScroll(isOpen);
+  useLockBodyScroll(isOpen);
   const [phone, setPhone] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);

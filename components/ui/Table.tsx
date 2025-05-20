@@ -63,7 +63,7 @@ export default function Table<T extends { id?: number | string }>({
                 {columns.map((column, colIndex) => (
                   <td
                     key={colIndex}
-                    className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900"
+                    className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs xs:text-sm text-gray-900"
                   >
                     {typeof column.accessor === "function"
                       ? column.accessor(item)

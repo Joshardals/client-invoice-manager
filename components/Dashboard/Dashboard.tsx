@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { ClientFormData } from "@/lib/form/validation";
 import Button from "../ui/Button";
 import { CreateInvoiceModal } from "./CreateInvoiceModal";
-import { InvoiceData } from "@/typings";
+import { InvoiceData } from "@/typings";   
 
 interface Invoice {
   id: number;

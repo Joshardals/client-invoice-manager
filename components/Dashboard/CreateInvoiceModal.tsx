@@ -10,14 +10,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   X,
   Receipt,
-  Calendar,
-  DollarSign,
   FileText,
   Plus,
   Minus,
   ArrowRight,
   ArrowLeft,
-  ChevronDown,
   UserPlus,
 } from "lucide-react";
 

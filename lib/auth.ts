@@ -79,7 +79,12 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         // This will only be executed at login. Each next invocation will skip this part.
-        token.user = user;
+        token.user = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          emailVerified: user.emailVerified,
+        };
         token.lastRefresh = Date.now();
       }
 

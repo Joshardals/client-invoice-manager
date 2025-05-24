@@ -22,6 +22,7 @@ import { isPhoneValid } from "@/lib/utils";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import "react-international-phone/style.css";
+import { createClient } from "@/app/actions/create-client";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -77,29 +78,48 @@ export function AddClientModal({
     async (data: ClientFormData) => {
       setIsLoading(true);
       try {
-        await new Promise((r) => setTimeout(r, 1000));
-        // Clean up phone number - if it's just a country code, set it to empty string
         const cleanedData = {
           ...data,
+          fullName: data.fullName.trim().replace(/\s+/g, " "),
+          email: data.email.trim().toLowerCase(),
           phone:
             data.phone &&
             isPhoneValid(data.phone) &&
             data.phone.match(/^\+\d{1,3}$/)
               ? ""
               : data.phone,
+          company: data.company?.trim().replace(/\s+/g, " ") || "",
+          address: data.address?.trim().replace(/\s+/g, " ") || "",
+          notes: data.notes?.trim().replace(/\s+/g, " ") || "",
         };
-        onSuccess(cleanedData);
-        reset();
-        setCurrentStep(1);
-        onClose();
+
+        const result = await createClient(cleanedData);
+
+        if (result.success) {
+          onSuccess(cleanedData);
+          reset();
+          setCurrentStep(1);
+          onClose();
+          window.alert("Client added successfully");
+          // toast.success("Client added successfully");
+        }
       } catch (error) {
         console.error("Error:", error);
       } finally {
         setIsLoading(false);
       }
     },
-    [onSuccess, onClose]
+    [onSuccess, onClose, reset]
   );
+
+  const handleFinalSubmit = async () => {
+    const isValidStep = await trigger();
+
+    if (isValidStep) {
+      const formData = watch();
+      await onSubmit(formData);
+    }
+  };
 
   const steps = [
     { number: 1, title: "Basic Info" },
@@ -311,8 +331,7 @@ export function AddClientModal({
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
-                    form="add-client-form"
+                    onClick={handleFinalSubmit}
                     loading={isLoading}
                     disabled={!isValid}
                     fullWidth={false}

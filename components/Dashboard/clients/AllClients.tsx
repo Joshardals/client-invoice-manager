@@ -2,6 +2,7 @@
 import React, { useCallback, useState } from "react";
 import { Eye, Edit2, Trash2, Search, ArrowLeft } from "lucide-react";
 import Table from "@/components/ui/Table";
+import { ClientsSkeleton } from "./ClientSkeleton";
 
 interface Client {
   id: string;

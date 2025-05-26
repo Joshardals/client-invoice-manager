@@ -12,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 
 interface Client {
   id: string;
@@ -36,6 +37,7 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  useLockBodyScroll(viewModalOpen || deleteDialogOpen);
 
   const handleDelete = () => {
     if (onDelete) {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useForm,
@@ -26,6 +26,7 @@ import SelectField from "../ui/SelectField";
 import { InvoiceSummary } from "./invoiceSummary";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
+import { createInvoice } from "@/app/actions/invoice.action";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -72,6 +73,7 @@ export function CreateInvoiceModal({
     setValue,
     trigger,
     formState: { errors, isValid },
+    reset,
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
     defaultValues,
@@ -149,20 +151,38 @@ export function CreateInvoiceModal({
 
   const goToPrevStep = () => setCurrentStep((prev) => prev - 1);
 
-  const onSubmit: SubmitHandler<InvoiceFormData> = async (data) => {
-    setIsLoading(true);
-    try {
-      const transformedData = {
-        ...data,
-        invoiceDate: new Date(data.invoiceDate),
-        dueDate: new Date(data.dueDate),
-      };
-      await handleSubmitInvoice(transformedData);
-      onClose();
-    } catch (error) {
-      console.error("Error creating invoice:", error);
-    } finally {
-      setIsLoading(false);
+  const onSubmit = useCallback(
+    async (data: InvoiceFormData) => {
+      setIsLoading(true);
+      try {
+        const result = await createInvoice(data);
+
+        if (result.success) {
+          reset();
+          setCurrentStep(1);
+          onClose();
+          window.alert("Invoice created successfully");
+          // toast.success("Invoice created successfully");
+        } else {
+          // Handle error
+          window.alert(result.error || "Failed to create invoice");
+        }
+      } catch (error) {
+        console.error("Error creating invoice:", error);
+        window.alert("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [onClose, reset]
+  );
+
+  const handleFinalSubmit = async () => {
+    const isValidStep = await trigger();
+
+    if (isValidStep) {
+      const formData = watch();
+      await onSubmit(formData);
     }
   };
 
@@ -535,8 +555,7 @@ export function CreateInvoiceModal({
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
-                    form="invoice-form"
+                    onClick={handleFinalSubmit}
                     loading={isLoading}
                     disabled={!isValid}
                     className="text-sm xs:text-base"

@@ -22,7 +22,7 @@ import { isPhoneValid } from "@/lib/utils";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import "react-international-phone/style.css";
-import { createClient } from "@/app/actions/create-client";
+import { createClient } from "@/app/actions/client.action";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -102,9 +102,12 @@ export function AddClientModal({
           onClose();
           window.alert("Client added successfully");
           // toast.success("Client added successfully");
+        } else {
+          window.alert(result.error || "Failed to add client");
         }
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error adding client:", error);
+        window.alert("An unexpected error occurred");
       } finally {
         setIsLoading(false);
       }

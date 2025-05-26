@@ -4,11 +4,19 @@ import { Eye, Edit2, Trash2, Search, ArrowLeft } from "lucide-react";
 import Table from "@/components/ui/Table";
 
 interface Client {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  phone: string;
-  company: string;
+  phone: string | null;
+  company: string | null;
+}
+
+interface AllClientsProps {
+  allClients: {
+    success: boolean;
+    clients?: Client[];
+    error?: string;
+  };
 }
 
 interface TableColumn<T> {
@@ -16,54 +24,18 @@ interface TableColumn<T> {
   accessor: keyof T | ((item: T) => React.ReactNode);
 }
 
-export function AllClients() {
-  const initialClients: Client[] = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john@apex.com",
-      phone: "+234 800 123 4567",
-      company: "Apex Solutions",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      email: "sarah@global.com",
-      phone: "+234 800 234 5678",
-      company: "Global Tech",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      email: "michael@metro.com",
-      phone: "+234 800 345 6789",
-      company: "Metro Systems",
-    },
-    {
-      id: 4,
-      name: "Jessica Davis",
-      email: "jessica@delta.com",
-      phone: "+234 800 456 7890",
-      company: "Delta Corp",
-    },
-    {
-      id: 5,
-      name: "David Miller",
-      email: "david@echo.com",
-      phone: "+234 800 567 8901",
-      company: "Echo Industries",
-    },
-  ];
-
+export function AllClients({ allClients }: AllClientsProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [clients, setClients] = useState<Client[]>(initialClients);
+  const clients: Client[] = allClients.clients || [];
 
   const filteredClients = useCallback(
     () =>
       clients.filter(
         (client) =>
           client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          client.company.toLowerCase().includes(searchTerm.toLowerCase())
+          (client.company?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          )
       ),
     [clients, searchTerm]
   );
@@ -72,19 +44,19 @@ export function AllClients() {
     setSearchTerm(e.target.value);
   }, []);
 
-  const handleView = useCallback((id: number) => {
+  const handleView = useCallback((id: string) => {
     console.log("View client:", id);
   }, []);
 
-  const handleEdit = useCallback((id: number) => {
+  const handleEdit = useCallback((id: string) => {
     console.log("Edit client:", id);
   }, []);
 
-  const handleDelete = useCallback((id: number) => {
-    setClients((prevClients) =>
-      prevClients.filter((client) => client.id !== id)
-    );
-  }, []);
+  // const handleDelete = useCallback((id: string) => {
+  //   setClients((prevClients) =>
+  //     prevClients.filter((client) => client.id !== id)
+  //   );
+  // }, []);
 
   const columns: TableColumn<Client>[] = [
     { header: "Full Name", accessor: "name" as keyof Client },
@@ -108,7 +80,7 @@ export function AllClients() {
         <Edit2 className="size-4 xs:size-5" />
       </button>
       <button
-        onClick={() => handleDelete(client.id)}
+        // onClick={() => handleDelete(client.id)}
         className="text-red-600 hover:text-red-800"
       >
         <Trash2 className="size-4 xs:size-5" />

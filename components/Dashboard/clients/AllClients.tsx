@@ -1,16 +1,9 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Eye, Edit2, Trash2, Search, ArrowLeft } from "lucide-react";
+import { Eye, Edit2, Trash2, Search } from "lucide-react";
 import Table from "@/components/ui/Table";
-import { ClientsSkeleton } from "./ClientSkeleton";
-
-interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  company: string | null;
-}
+import { ActionButtons } from "./ActionButtons";
+import { Client } from "@/typings";
 
 interface AllClientsProps {
   allClients: {
@@ -45,49 +38,30 @@ export function AllClients({ allClients }: AllClientsProps) {
     setSearchTerm(e.target.value);
   }, []);
 
-  const handleView = useCallback((id: string) => {
-    console.log("View client:", id);
+  const handleEdit = useCallback((clientId: string) => {
+    console.log("Edit client:", clientId);
   }, []);
 
-  const handleEdit = useCallback((id: string) => {
-    console.log("Edit client:", id);
+  const handleDelete = useCallback((clientId: string) => {
+    console.log("Delete client:", clientId);
   }, []);
-
-  // const handleDelete = useCallback((id: string) => {
-  //   setClients((prevClients) =>
-  //     prevClients.filter((client) => client.id !== id)
-  //   );
-  // }, []);
 
   const columns: TableColumn<Client>[] = [
     { header: "Full Name", accessor: "name" as keyof Client },
     { header: "Email", accessor: "email" as keyof Client },
     { header: "Phone", accessor: "phone" as keyof Client },
     { header: "Company", accessor: "company" as keyof Client },
+    {
+      header: "Actions",
+      accessor: (client: Client) => (
+        <ActionButtons
+          client={client}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      ),
+    },
   ];
-
-  const actionButtons = (client: Client) => (
-    <div className="flex space-x-1 xs:space-x-2">
-      <button
-        onClick={() => handleView(client.id)}
-        className="text-blue-600 hover:text-blue-800"
-      >
-        <Eye className="size-4 xs:size-5" />
-      </button>
-      <button
-        onClick={() => handleEdit(client.id)}
-        className="text-yellow-600 hover:text-yellow-800"
-      >
-        <Edit2 className="size-4 xs:size-5" />
-      </button>
-      <button
-        // onClick={() => handleDelete(client.id)}
-        className="text-red-600 hover:text-red-800"
-      >
-        <Trash2 className="size-4 xs:size-5" />
-      </button>
-    </div>
-  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -116,11 +90,7 @@ export function AllClients({ allClients }: AllClientsProps) {
       </div>
 
       {/* Clients Table */}
-      <Table
-        data={filteredClients()}
-        columns={columns}
-        actions={actionButtons}
-      />
+      <Table data={filteredClients()} columns={columns} />
     </div>
   );
 }

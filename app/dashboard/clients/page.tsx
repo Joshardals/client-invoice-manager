@@ -13,6 +13,7 @@ export default async function ClientsPage() {
 
 async function ClientsContent() {
   const clients = await getClients();
+  console.log(clients);
 
   if (!clients.success) {
     throw new Error(clients.error || "Failed to load clients");

@@ -41,13 +41,6 @@ export async function getClients() {
       where: {
         userId: session.user.id,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        company: true,
-      },
     });
 
     return { success: true, clients };

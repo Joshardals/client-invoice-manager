@@ -70,3 +70,14 @@ export type InvoiceData = {
     total: number;
   }[];
 };
+
+// Type for the All Clients Page
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  address?: string | null;
+  notes?: string | null;
+}

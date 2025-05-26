@@ -220,7 +220,7 @@ export function CreateInvoiceModal({
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
           >
-            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh]  flex flex-col">
+            <div className="bg-white rounded-lg xs:rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] sm:max-h-[90vh] flex flex-col">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center justify-between">
@@ -242,7 +242,7 @@ export function CreateInvoiceModal({
                     className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors"
                     fullWidth={false}
                   >
-                    <X className="w-4 h-4 xs:size-5 text-gray-500" />
+                    <X className="size-5 text-gray-500" />
                   </Button>
                 </div>
 

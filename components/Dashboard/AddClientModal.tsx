@@ -177,10 +177,10 @@ export function AddClientModal({
                   </div>
                   <Button
                     onClick={onClose}
-                    className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg xs:rounded-xl transition-colors"
+                    className="p-1.5 sm:p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors"
                     fullWidth={false}
                   >
-                    <X className="size-4 xs:size-5 text-gray-500" />
+                    <X className="size-5 text-gray-500" />
                   </Button>
                 </div>
 

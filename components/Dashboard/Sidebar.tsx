@@ -167,7 +167,7 @@ export function Sidebar() {
 
       {/* Sidebar Desktop */}
       <div
-        className={`hidden lg:flex h-screen fixed left-0 top-0 transition-all duration-300 ease-in-out ${
+        className={`hidden lg:flex h-screen fixed z-10 left-0 top-0 transition-all duration-300 ease-in-out ${
           isOpen ? "w-64" : "w-20"
         }`}
       >

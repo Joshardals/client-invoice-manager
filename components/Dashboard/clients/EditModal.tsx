@@ -124,7 +124,7 @@ export function EditModal({
     <div className="flex-1 h-0.5 mx-2">
       <div
         className={`h-full transition-colors duration-300 ${
-          active ? "bg-blue-500" : "bg-gray-200"
+          active ? "bg-yellow-500" : "bg-gray-200"
         }`}
       />
     </div>

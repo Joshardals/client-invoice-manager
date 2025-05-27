@@ -1,12 +1,14 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Users, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
 import Table from "@/components/ui/Table";
 import { ActionButtons } from "./ActionButtons";
 import { Client } from "@/typings";
 import { deleteClient, updateClient } from "@/app/actions/client.action";
 import { ClientFormData } from "@/lib/form/validation";
 import { EditModal } from "./EditModal";
+import Button from "@/components/ui/Button";
 
 interface AllClientsProps {
   allClients: {
@@ -20,6 +22,33 @@ interface TableColumn<T> {
   header: string;
   accessor: keyof T | ((item: T) => React.ReactNode);
 }
+
+const EmptyState = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="absolute inset-0 flex flex-col items-center justify-center text-center min-h-screen"
+  >
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ delay: 0.2 }}
+      className="relative mx-auto w-24 h-24 mb-8"
+    >
+      <div className="absolute inset-0 bg-blue-100 rounded-full" />
+      <Users className="absolute inset-0 m-auto h-12 w-12 text-blue-600" />
+    </motion.div>
+    <h3 className="text-xl font-semibold text-gray-900 mb-2">No Clients Yet</h3>
+    <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+      Get started by adding your first client. Click the button below to create
+      a new client record.
+    </p>
+    <Button fullWidth={false} className="mx-auto">
+      <UserPlus className="w-4 h-4 mr-1.5 sm:mr-2" />
+      Add New Client
+    </Button>
+  </motion.div>
+);
 
 export function AllClients({ allClients }: AllClientsProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -106,9 +135,12 @@ export function AllClients({ allClients }: AllClientsProps) {
     },
   ];
 
+  if (!clients.length) {
+    return <EmptyState />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">
@@ -121,7 +153,6 @@ export function AllClients({ allClients }: AllClientsProps) {
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 sm:h-5 w-4 sm:w-5" />
         <input
@@ -133,7 +164,6 @@ export function AllClients({ allClients }: AllClientsProps) {
         />
       </div>
 
-      {/* Clients Table */}
       <Table data={filteredClients()} columns={columns} />
 
       {selectedClient && (

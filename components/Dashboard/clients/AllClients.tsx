@@ -1,9 +1,12 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Eye, Edit2, Trash2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Table from "@/components/ui/Table";
 import { ActionButtons } from "./ActionButtons";
 import { Client } from "@/typings";
+import { deleteClient, updateClient } from "@/app/actions/client.action";
+import { ClientFormData } from "@/lib/form/validation";
+import { EditModal } from "./EditModal";
 
 interface AllClientsProps {
   allClients: {
@@ -20,7 +23,9 @@ interface TableColumn<T> {
 
 export function AllClients({ allClients }: AllClientsProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const clients: Client[] = allClients.clients || [];
+  const [clients, setClients] = useState<Client[]>(allClients.clients || []);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const filteredClients = useCallback(
     () =>
@@ -38,13 +43,50 @@ export function AllClients({ allClients }: AllClientsProps) {
     setSearchTerm(e.target.value);
   }, []);
 
-  const handleEdit = useCallback((clientId: string) => {
-    console.log("Edit client:", clientId);
+  const handleEdit = useCallback(
+    (clientId: string) => {
+      const client = clients.find((c) => c.id === clientId);
+      if (client) {
+        setSelectedClient(client);
+        setIsEditModalOpen(true);
+      }
+    },
+    [clients]
+  );
+
+  const handleDelete = useCallback(async (clientId: string) => {
+    const result = await deleteClient(clientId);
+    if (result.success) {
+      setClients((prev) => prev.filter((client) => client.id !== clientId));
+      window.alert("Client deleted successfully");
+    } else {
+      window.alert(result.error || "Failed to delete client");
+    }
   }, []);
 
-  const handleDelete = useCallback((clientId: string) => {
-    console.log("Delete client:", clientId);
-  }, []);
+  const handleUpdate = useCallback(
+    async (clientId: string, data: ClientFormData) => {
+      const result = await updateClient(clientId, data);
+      if (result.success) {
+        setClients((prev) =>
+          prev.map((client) =>
+            client.id === clientId
+              ? {
+                  ...client,
+                  name: data.fullName,
+                  email: data.email,
+                  phone: data.phone || null,
+                  company: data.company || null,
+                  address: data.address || null,
+                  notes: data.notes || null,
+                }
+              : client
+          )
+        );
+      }
+    },
+    []
+  );
 
   const columns: TableColumn<Client>[] = [
     { header: "Full Name", accessor: "name" as keyof Client },
@@ -58,6 +100,7 @@ export function AllClients({ allClients }: AllClientsProps) {
           client={client}
           onDelete={handleDelete}
           onEdit={handleEdit}
+          onUpdate={handleUpdate}
         />
       ),
     },
@@ -72,7 +115,8 @@ export function AllClients({ allClients }: AllClientsProps) {
             All Clients
           </h1>
           <p className="mt-1 text-xs xs:text-sm text-gray-600">
-            Showing {filteredClients().length} Clients
+            Showing {filteredClients().length}{" "}
+            {filteredClients().length === 1 ? "client" : "clients"}
           </p>
         </div>
       </div>
@@ -91,6 +135,18 @@ export function AllClients({ allClients }: AllClientsProps) {
 
       {/* Clients Table */}
       <Table data={filteredClients()} columns={columns} />
+
+      {selectedClient && (
+        <EditModal
+          client={selectedClient}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedClient(null);
+          }}
+          onUpdate={handleUpdate}
+        />
+      )}
     </div>
   );
 }

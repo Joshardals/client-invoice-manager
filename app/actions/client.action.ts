@@ -35,7 +35,6 @@ export async function createClient(data: ClientFormData) {
 }
 
 export async function getClients() {
-  console.log("Fetching clients from DB...");
   try {
     const session = await getAuthSession();
 

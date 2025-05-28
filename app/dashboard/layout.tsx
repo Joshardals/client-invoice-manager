@@ -1,4 +1,4 @@
-import { DashboardContent } from "@/components/Dashboard/DashboaordContent";
+import { DashboardContent } from "@/components/Dashboard/DashboardContent";
 import { Sidebar } from "@/components/Dashboard/Sidebar";
 import { getAuthSession } from "@/lib/auth";
 import { redirect } from "next/navigation";

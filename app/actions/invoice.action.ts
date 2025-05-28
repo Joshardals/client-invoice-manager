@@ -2,6 +2,7 @@
 import { getAuthSession } from "@/lib/auth";
 import { InvoiceFormData } from "@/lib/form/validation";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function createInvoice(data: InvoiceFormData) {
   try {
@@ -22,8 +23,8 @@ export async function createInvoice(data: InvoiceFormData) {
         amount: totalAmount,
         currency: data.currency,
         status: "pending", // Default status for new invoices
-        dueDate: data.dueDate,
-        invoiceDate: data.invoiceDate,
+        dueDate: new Date(data.dueDate + "T00:00:00.000Z"),
+        invoiceDate: new Date(data.invoiceDate + "T00:00:00.000Z"),
         userId: session.user.id,
         clientId: data.clientId,
         items: {
@@ -41,6 +42,8 @@ export async function createInvoice(data: InvoiceFormData) {
       },
     });
 
+    revalidatePath("/dashboard/clients");
+    revalidatePath("/dashboard");
     return { success: true, invoice };
   } catch (error) {
     console.error("Failed to create invoice:", error);

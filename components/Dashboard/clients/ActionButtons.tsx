@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useCallback, memo } from "react";
 import {
   Eye,

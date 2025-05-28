@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,15 +28,18 @@ import { InvoiceSummary } from "./invoiceSummary";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { createInvoice } from "@/app/actions/invoice.action";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { VirtualizedSelect } from "./VirtualizedSelect";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: InvoiceData) => void;
+  // onSubmit: (data: InvoiceData) => void;
   clients: Array<{
     id: string;
     name: string;
   }>;
+  loadingClients?: boolean;
 }
 
 type FieldName =
@@ -49,7 +53,7 @@ export function CreateInvoiceModal({
   isOpen,
   onClose,
   clients,
-  onSubmit: handleSubmitInvoice,
+  loadingClients,
 }: CreateInvoiceModalProps) {
   useLockBodyScroll(isOpen);
   const [currentStep, setCurrentStep] = useState(1);
@@ -339,9 +343,8 @@ export function CreateInvoiceModal({
 
                   {currentStep === 2 && (
                     <div className="space-y-4 xs:space-y-6">
-                      <SelectField
+                      <VirtualizedSelect
                         label={Label(UserPlus, "Select Client", true)}
-                        {...register("clientId")}
                         error={errors.clientId?.message}
                         options={[
                           { value: "", label: "Choose who you're billing..." },
@@ -350,8 +353,17 @@ export function CreateInvoiceModal({
                             label: client.name,
                           })) || []),
                         ]}
+                        placeholder="Choose who you're billing..."
+                        disabled={loadingClients}
+                        value={watch("clientId")} // Directly pass the value instead of spreading registerSelect
+                        onChange={(value: string) =>
+                          setValue("clientId", value, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
+                        }
+                        name="clientId"
                       />
-
                       <div className="space-y-4">
                         <div className="bg-blue-50 p-4 rounded-lg text-xs xs:text-sm text-blue-700">
                           Add items you're billing for. Each item should include

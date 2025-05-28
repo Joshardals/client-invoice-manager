@@ -1,3 +1,4 @@
+"use client";
 import { Calendar, Eye, EyeOff } from "lucide-react";
 import { forwardRef, useState } from "react";
 import type { InputFieldProps } from "@/typings";

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { UserPlus, Users } from "lucide-react";
 
 export function EmptyState() {
-  const { open } = useAddClientModal();
+  const { open: openClientModal } = useAddClientModal();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,7 +27,7 @@ export function EmptyState() {
         Get started by adding your first client. <br />
         Click the button below to create a new client record.
       </p>
-      <Button fullWidth={false} className="mx-auto" onClick={open}>
+      <Button fullWidth={false} className="mx-auto" onClick={openClientModal}>
         <UserPlus className="w-4 h-4 mr-1.5 sm:mr-2" />
         Add New Client
       </Button>

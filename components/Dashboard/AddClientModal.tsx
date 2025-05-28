@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (data: ClientFormData) => void;
+  onSuccess: () => void;
 }
 
 export function AddClientModal({
@@ -100,7 +100,7 @@ export function AddClientModal({
         const result = await createClient(cleanedData);
 
         if (result.success) {
-          onSuccess(cleanedData);
+          onSuccess();
           reset();
           setCurrentStep(1);
           onClose();

@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -15,11 +15,9 @@ import {
 import Table from "../ui/Table";
 import { today } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import Button from "../ui/Button";
-import { CreateInvoiceModal } from "./CreateInvoiceModal";
-import { InvoiceData } from "@/typings";
 import { useAddClientModal } from "@/lib/stores/useAddClientModal";
+import { useCreateInvoiceModal } from "@/lib/stores/useCreateInvoiceModal";
 
 interface Invoice {
   id: number;
@@ -38,9 +36,8 @@ interface StatCard {
 
 export function Dashboard() {
   const router = useRouter();
-  const { open } = useAddClientModal();
-  const [isCreateInvoiceModalOpen, setIsCreateInvoiceModalOpen] =
-    useState(false);
+  const { open: openClientModal } = useAddClientModal();
+  const { open: openInvoiceModal } = useCreateInvoiceModal();
 
   const stats: StatCard[] = useMemo(
     () => [
@@ -145,22 +142,6 @@ export function Dashboard() {
     [router]
   );
 
-  const handleCreateInvoiceSuccess = useCallback((data: InvoiceData) => {
-    toast.success("Invoice created successfully");
-    console.log(data);
-    setIsCreateInvoiceModalOpen(false);
-  }, []);
-
-  // Add mock clients data (replace with your actual clients data)
-  const clients = useMemo(
-    () => [
-      { id: "1", name: "Apex Solutions" },
-      { id: "2", name: "Global Tech" },
-      { id: "3", name: "Metro Systems" },
-    ],
-    []
-  );
-
   return (
     <>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -176,15 +157,12 @@ export function Dashboard() {
 
           {/* Quick Actions */}
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 sm:gap-3">
-            <Button onClick={open} fullWidth={false}>
+            <Button onClick={openClientModal} fullWidth={false}>
               <PlusCircle className="w-4 h-4 mr-1.5 sm:mr-2" />
               Add Client
             </Button>
 
-            <Button
-              onClick={() => setIsCreateInvoiceModalOpen(true)}
-              fullWidth={false}
-            >
+            <Button onClick={openInvoiceModal} fullWidth={false}>
               <FilePlus className="w-4 h-4 mr-1.5 sm:mr-2" />
               Create Invoice
             </Button>
@@ -249,19 +227,6 @@ export function Dashboard() {
           </motion.div>
         </div>
       </div>
-
-      {/* <AddClientModal
-        isOpen={isOpen}
-        onClose={close}
-        onSuccess={handleAddClientSuccess}
-      /> */}
-
-      <CreateInvoiceModal
-        isOpen={isCreateInvoiceModalOpen}
-        onClose={() => setIsCreateInvoiceModalOpen(false)}
-        onSubmit={handleCreateInvoiceSuccess}
-        clients={clients}
-      />
     </>
   );
 }

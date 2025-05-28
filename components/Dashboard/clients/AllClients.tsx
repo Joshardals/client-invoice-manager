@@ -1,7 +1,5 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Search } from "lucide-react";
-
 import Table from "@/components/ui/Table";
 import { ActionButtons } from "./ActionButtons";
 import { Client } from "@/typings";
@@ -9,6 +7,8 @@ import { deleteClient, updateClient } from "@/app/actions/client.action";
 import { ClientFormData } from "@/lib/form/validation";
 import { EditModal } from "./EditModal";
 import { EmptyState } from "./EmptyState";
+import { NoSearchResults } from "./NoSearchResult";
+import { SearchBar } from "./SearchBar";
 
 interface AllClientsProps {
   allClients: {
@@ -43,6 +43,10 @@ export function AllClients({ allClients }: AllClientsProps) {
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  }, []);
+
+  const handleSearchReset = useCallback(() => {
+    setSearchTerm("");
   }, []);
 
   const handleEdit = useCallback(
@@ -112,10 +116,6 @@ export function AllClients({ allClients }: AllClientsProps) {
     return <EmptyState />;
   }
 
-  if (!filteredClients().length && searchTerm) {
-    return <p>No results match your search.</p>;
-  }
-
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -130,18 +130,13 @@ export function AllClients({ allClients }: AllClientsProps) {
         </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 sm:h-5 w-4 sm:w-5" />
-        <input
-          type="text"
-          placeholder="Search by name or company..."
-          className="w-full pl-10 pr-4 py-2 text-sm xs:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-      </div>
+      <SearchBar value={searchTerm} onChange={handleSearch} />
 
-      <Table data={filteredClients()} columns={columns} />
+      {filteredClients().length === 0 ? (
+        <NoSearchResults searchTerm={searchTerm} onReset={handleSearchReset} />
+      ) : (
+        <Table data={filteredClients()} columns={columns} />
+      )}
 
       {selectedClient && (
         <EditModal

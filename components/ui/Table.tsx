@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface TableColumn<T> {
   header: string | (() => React.ReactNode);
@@ -14,6 +20,7 @@ interface TableProps<T> {
   actions?: (item: T) => React.ReactNode;
   onRowClick?: (item: T) => void;
   isAnimated?: boolean;
+  itemsPerPage?: number;
 }
 
 type SortOrder = "asc" | "desc" | null;
@@ -24,6 +31,7 @@ export default function Table<T extends { id?: number | string }>({
   actions,
   onRowClick,
   isAnimated = true,
+  itemsPerPage = 10,
 }: TableProps<T>) {
   const [sortConfig, setSortConfig] = useState<{
     key: keyof T | null;
@@ -32,6 +40,8 @@ export default function Table<T extends { id?: number | string }>({
     key: null,
     order: null,
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleSort = (accessor: keyof T | ((item: T) => React.ReactNode)) => {
     if (typeof accessor === "function") return;
@@ -47,6 +57,7 @@ export default function Table<T extends { id?: number | string }>({
               : "asc"
           : "asc",
     }));
+    setCurrentPage(1); // Reset to first page when sorting
   };
 
   const getSortedData = () => {
@@ -103,6 +114,45 @@ export default function Table<T extends { id?: number | string }>({
     return value as React.ReactNode;
   };
 
+  // Pagination logic
+  const totalItems = getSortedData().length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  const getPaginatedData = () => {
+    return getSortedData().slice(startIndex, endIndex);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return pageNumbers;
+  };
+
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-6 bg-white rounded-xl shadow-sm">
+        <p className="text-gray-500">No data available</p>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={isAnimated ? { opacity: 0, y: 20 } : false}
@@ -143,7 +193,7 @@ export default function Table<T extends { id?: number | string }>({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {getSortedData().map((item, rowIndex) => (
+            {getPaginatedData().map((item, rowIndex) => (
               <motion.tr
                 key={item.id || rowIndex}
                 initial={isAnimated ? { opacity: 0 } : false}
@@ -172,6 +222,77 @@ export default function Table<T extends { id?: number | string }>({
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="border-t border-gray-200">
+          <div className="flex items-center justify-between gap-2 px-3 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">{startIndex + 1}</span>{" "}
+                  to <span className="font-medium">{endIndex}</span> of{" "}
+                  <span className="font-medium">{totalItems}</span> results
+                </p>
+              </div>
+              <div>
+                <nav
+                  className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                  aria-label="Pagination"
+                >
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                  {getPageNumbers().map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      aria-current={
+                        currentPage === pageNum ? "page" : undefined
+                      }
+                      className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ${
+                        currentPage === pageNum
+                          ? "z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                          : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

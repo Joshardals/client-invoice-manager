@@ -15,12 +15,11 @@ import {
 import Table from "../ui/Table";
 import { today } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { AddClientModal } from "./AddClientModal";
 import { toast } from "react-toastify";
-import { ClientFormData } from "@/lib/form/validation";
 import Button from "../ui/Button";
 import { CreateInvoiceModal } from "./CreateInvoiceModal";
-import { InvoiceData } from "@/typings";   
+import { InvoiceData } from "@/typings";
+import { useAddClientModal } from "@/lib/stores/useAddClientModal";
 
 interface Invoice {
   id: number;
@@ -39,7 +38,7 @@ interface StatCard {
 
 export function Dashboard() {
   const router = useRouter();
-  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const { open } = useAddClientModal();
   const [isCreateInvoiceModalOpen, setIsCreateInvoiceModalOpen] =
     useState(false);
 
@@ -146,11 +145,6 @@ export function Dashboard() {
     [router]
   );
 
-  const handleAddClientSuccess = useCallback((clientData: ClientFormData) => {
-    toast.success("Client added successfully");
-    console.log(clientData);
-  }, []);
-
   const handleCreateInvoiceSuccess = useCallback((data: InvoiceData) => {
     toast.success("Invoice created successfully");
     console.log(data);
@@ -182,10 +176,7 @@ export function Dashboard() {
 
           {/* Quick Actions */}
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 sm:gap-3">
-            <Button
-              onClick={() => setIsAddClientModalOpen(true)}
-              fullWidth={false}
-            >
+            <Button onClick={open} fullWidth={false}>
               <PlusCircle className="w-4 h-4 mr-1.5 sm:mr-2" />
               Add Client
             </Button>
@@ -259,11 +250,11 @@ export function Dashboard() {
         </div>
       </div>
 
-      <AddClientModal
-        isOpen={isAddClientModalOpen}
-        onClose={() => setIsAddClientModalOpen(false)}
+      {/* <AddClientModal
+        isOpen={isOpen}
+        onClose={close}
         onSuccess={handleAddClientSuccess}
-      />
+      /> */}
 
       <CreateInvoiceModal
         isOpen={isCreateInvoiceModalOpen}

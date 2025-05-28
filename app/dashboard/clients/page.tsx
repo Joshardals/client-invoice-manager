@@ -13,11 +13,10 @@ export default async function ClientsPage() {
 
 async function ClientsContent() {
   const clients = await getClients();
-  console.log(clients);
 
   if (!clients.success) {
     throw new Error(clients.error || "Failed to load clients");
   }
 
-  return <AllClients allClients={clients} />;
+  return <AllClients key={Date.now()} allClients={clients} />;
 }

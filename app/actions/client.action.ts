@@ -2,6 +2,7 @@
 import { getAuthSession } from "@/lib/auth";
 import { ClientFormData } from "@/lib/form/validation";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function createClient(data: ClientFormData) {
   try {
@@ -21,6 +22,8 @@ export async function createClient(data: ClientFormData) {
       },
     });
 
+    revalidatePath("/dashboard/clients");
+    revalidatePath("/dashboard");
     return { success: true, client };
   } catch (error) {
     console.error("Failed to create client:", error);
@@ -32,6 +35,7 @@ export async function createClient(data: ClientFormData) {
 }
 
 export async function getClients() {
+  console.log("Fetching clients from DB...");
   try {
     const session = await getAuthSession();
 

@@ -23,6 +23,7 @@ import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import "react-international-phone/style.css";
 import { createClient } from "@/app/actions/client.action";
+import { useRouter } from "next/navigation";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export function AddClientModal({
   const [phone, setPhone] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const {
     register,
     handleSubmit,
@@ -74,6 +76,8 @@ export function AddClientModal({
     }
   };
 
+  const router = useRouter();
+
   const onSubmit = useCallback(
     async (data: ClientFormData) => {
       setIsLoading(true);
@@ -100,8 +104,17 @@ export function AddClientModal({
           reset();
           setCurrentStep(1);
           onClose();
-          window.alert("Client added successfully");
+
           // toast.success("Client added successfully");
+
+          // Force a hard refresh
+          router.refresh();
+
+          // Another refreshh to ensure the UI updates
+          setTimeout(() => {
+            router.refresh();
+          }, 100);
+          window.alert("Client added successfully");
         } else {
           window.alert(result.error || "Failed to add client");
         }
@@ -112,7 +125,7 @@ export function AddClientModal({
         setIsLoading(false);
       }
     },
-    [onSuccess, onClose, reset]
+    [onSuccess, onClose, reset, router]
   );
 
   const handleFinalSubmit = async () => {

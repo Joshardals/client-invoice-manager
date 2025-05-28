@@ -1,14 +1,14 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Search, Users, UserPlus } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search } from "lucide-react";
+
 import Table from "@/components/ui/Table";
 import { ActionButtons } from "./ActionButtons";
 import { Client } from "@/typings";
 import { deleteClient, updateClient } from "@/app/actions/client.action";
 import { ClientFormData } from "@/lib/form/validation";
 import { EditModal } from "./EditModal";
-import Button from "@/components/ui/Button";
+import { EmptyState } from "./EmptyState";
 
 interface AllClientsProps {
   allClients: {
@@ -22,33 +22,6 @@ interface TableColumn<T> {
   header: string;
   accessor: keyof T | ((item: T) => React.ReactNode);
 }
-
-const EmptyState = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="absolute inset-0 flex flex-col items-center justify-center text-center min-h-screen"
-  >
-    <motion.div
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{ delay: 0.2 }}
-      className="relative mx-auto w-24 h-24 mb-8"
-    >
-      <div className="absolute inset-0 bg-blue-100 rounded-full" />
-      <Users className="absolute inset-0 m-auto h-12 w-12 text-blue-600" />
-    </motion.div>
-    <h3 className="text-xl font-semibold text-gray-900 mb-2">No Clients Yet</h3>
-    <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-      Get started by adding your first client. Click the button below to create
-      a new client record.
-    </p>
-    <Button fullWidth={false} className="mx-auto">
-      <UserPlus className="w-4 h-4 mr-1.5 sm:mr-2" />
-      Add New Client
-    </Button>
-  </motion.div>
-);
 
 export function AllClients({ allClients }: AllClientsProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -137,6 +110,10 @@ export function AllClients({ allClients }: AllClientsProps) {
 
   if (!clients.length) {
     return <EmptyState />;
+  }
+
+  if (!filteredClients().length && searchTerm) {
+    return <p>No results match your search.</p>;
   }
 
   return (

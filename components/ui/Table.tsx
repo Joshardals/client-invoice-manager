@@ -88,6 +88,21 @@ export default function Table<T extends { id?: number | string }>({
     return <ArrowUpDown className="w-4 h-4 inline-block ml-1 text-gray-400" />;
   };
 
+  const renderCellContent = (
+    item: T,
+    accessor: keyof T | ((item: T) => React.ReactNode)
+  ) => {
+    if (typeof accessor === "function") {
+      return accessor(item);
+    }
+
+    const value = item[accessor];
+    if (value === null || value === undefined || value === "") {
+      return "-";
+    }
+    return value as React.ReactNode;
+  };
+
   return (
     <motion.div
       initial={isAnimated ? { opacity: 0, y: 20 } : false}
@@ -101,7 +116,7 @@ export default function Table<T extends { id?: number | string }>({
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${
+                  className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none whitespace-nowrap ${
                     typeof column.accessor !== "function"
                       ? "cursor-pointer hover:bg-gray-100"
                       : ""
@@ -121,7 +136,7 @@ export default function Table<T extends { id?: number | string }>({
                 </th>
               ))}
               {actions && (
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Actions
                 </th>
               )}
@@ -144,9 +159,7 @@ export default function Table<T extends { id?: number | string }>({
                     key={colIndex}
                     className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs xs:text-sm text-gray-900"
                   >
-                    {typeof column.accessor === "function"
-                      ? column.accessor(item)
-                      : (item[column.accessor] as React.ReactNode)}
+                    {renderCellContent(item, column.accessor)}
                   </td>
                 ))}
                 {actions && (

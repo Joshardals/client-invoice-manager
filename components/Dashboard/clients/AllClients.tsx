@@ -30,7 +30,7 @@ export function AllClients({ allClients }: AllClientsProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const filteredClients = useCallback(
-    () =>
+    () => 
       clients.filter(
         (client) =>
           client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

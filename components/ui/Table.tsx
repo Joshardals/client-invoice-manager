@@ -9,10 +9,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-interface TableColumn<T> {
+export interface TableColumn<T> {
   header: string | (() => React.ReactNode);
   accessor: keyof T | ((item: T) => React.ReactNode);
   sortable?: boolean;
+  render?: (item: T) => React.ReactNode;
 }
 
 interface TableProps<T> {
@@ -58,7 +59,7 @@ export default function Table<T extends { id?: number | string }>({
               : "asc"
           : "asc",
     }));
-    setCurrentPage(1); // Reset to first page when sorting
+    setCurrentPage(1);
   };
 
   const getSortedData = () => {
@@ -68,16 +69,33 @@ export default function Table<T extends { id?: number | string }>({
       const aValue = a[sortConfig.key!];
       const bValue = b[sortConfig.key!];
 
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortConfig.order === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
+      // Convert values to comparable strings
+      const compareA = convertToString(aValue);
+      const compareB = convertToString(bValue);
 
-      if (aValue < bValue) return sortConfig.order === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortConfig.order === "asc" ? 1 : -1;
-      return 0;
+      return sortConfig.order === "asc"
+        ? compareA.localeCompare(compareB)
+        : compareB.localeCompare(compareA);
     });
+  };
+
+  const convertToString = <T extends unknown>(value: T): string => {
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    // Handle nested client object
+    if (typeof value === "object" && value !== null && "name" in value) {
+      return (value as { name: string }).name.toLowerCase();
+    }
+
+    // Handle Date objects
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    // Handle all other cases
+    return String(value).toLowerCase();
   };
 
   const getSortIcon = (accessor: keyof T | ((item: T) => React.ReactNode)) => {
@@ -102,20 +120,34 @@ export default function Table<T extends { id?: number | string }>({
 
   const renderCellContent = (
     item: T,
-    accessor: keyof T | ((item: T) => React.ReactNode)
-  ) => {
-    if (typeof accessor === "function") {
-      return accessor(item);
+    column: TableColumn<T>
+  ): React.ReactNode => {
+    if (column.render) {
+      return column.render(item);
     }
 
-    const value = item[accessor];
+    if (typeof column.accessor === "function") {
+      return column.accessor(item);
+    }
+
+    const value = item[column.accessor];
     if (value === null || value === undefined || value === "") {
       return "-";
     }
-    return value as React.ReactNode;
+
+    // Handle Date objects
+    if (value instanceof Date) {
+      return value.toLocaleDateString();
+    }
+
+    // Handle nested objects (like client.name)
+    if (typeof value === "object" && value !== null) {
+      return JSON.stringify(value);
+    }
+
+    return String(value);
   };
 
-  // Pagination logic
   const totalItems = getSortedData().length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -168,11 +200,13 @@ export default function Table<T extends { id?: number | string }>({
                 <th
                   key={index}
                   className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none whitespace-nowrap ${
+                    column.sortable !== false &&
                     typeof column.accessor !== "function"
                       ? "cursor-pointer hover:bg-gray-100"
                       : ""
                   }`}
                   onClick={() =>
+                    column.sortable !== false &&
                     typeof column.accessor !== "function" &&
                     handleSort(column.accessor)
                   }
@@ -181,7 +215,8 @@ export default function Table<T extends { id?: number | string }>({
                     {typeof column.header === "function"
                       ? column.header()
                       : column.header}
-                    {typeof column.accessor !== "function" &&
+                    {column.sortable !== false &&
+                      typeof column.accessor !== "function" &&
                       getSortIcon(column.accessor)}
                   </span>
                 </th>
@@ -210,7 +245,7 @@ export default function Table<T extends { id?: number | string }>({
                     key={colIndex}
                     className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs xs:text-sm text-gray-900"
                   >
-                    {renderCellContent(item, column.accessor)}
+                    {renderCellContent(item, column)}
                   </td>
                 ))}
                 {actions && (
@@ -273,7 +308,7 @@ export default function Table<T extends { id?: number | string }>({
                       }
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ${
                         currentPage === pageNum
-                          ? "z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                          ? "z-10 bg-blue-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                           : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       }`}
                     >

@@ -1,77 +1,32 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Eye, Edit2, Trash2, Search, FileText } from "lucide-react";
-import Table from "@/components/ui/Table";
+import { Eye, Edit2, Trash2, Search } from "lucide-react";
+import Table, { TableColumn } from "@/components/ui/Table";
+import { Invoice } from "@/typings";
+import { NoSearchResults } from "../clients/NoSearchResult";
+import { deleteInvoice } from "@/app/actions/invoice.action";
+import { ActionButtons } from "./ActionButtons";
 
-interface Invoice {
-  id: number;
-  invoiceNumber: string;
-  clientName: string;
-  amount: string;
-  status: "Paid" | "Unpaid" | "Overdue";
-  dateCreated: string;
+interface AllInvoicesProps {
+  allInvoices: {
+    success: boolean;
+    invoices?: Invoice[];
+    error?: string;
+  };
 }
 
-interface TableColumn<T> {
-  header: string;
-  accessor: keyof T | ((item: T) => React.ReactNode);
-}
-
-export function AllInvoices() {
-  const initialInvoices: Invoice[] = [
-    {
-      id: 1,
-      invoiceNumber: "INV-2025-001",
-      clientName: "Apex Solutions",
-      amount: "₦150,000",
-      status: "Paid",
-      dateCreated: "2025-05-10",
-    },
-    {
-      id: 2,
-      invoiceNumber: "INV-2025-002",
-      clientName: "Global Tech",
-      amount: "₦80,000",
-      status: "Unpaid",
-      dateCreated: "2025-05-08",
-    },
-    {
-      id: 3,
-      invoiceNumber: "INV-2025-003",
-      clientName: "Metro Systems",
-      amount: "₦200,000",
-      status: "Overdue",
-      dateCreated: "2025-04-15",
-    },
-    {
-      id: 4,
-      invoiceNumber: "INV-2025-004",
-      clientName: "Delta Corp",
-      amount: "₦120,000",
-      status: "Paid",
-      dateCreated: "2025-05-03",
-    },
-    {
-      id: 5,
-      invoiceNumber: "INV-2025-005",
-      clientName: "Echo Industries",
-      amount: "₦90,000",
-      status: "Unpaid",
-      dateCreated: "2025-05-01",
-    },
-  ];
-
+export function AllInvoices({ allInvoices }: AllInvoicesProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const [invoices, setInvoices] = useState<Invoice[]>(
+    allInvoices.invoices || []
+  );
 
   const filteredInvoices = useCallback(
     () =>
       invoices.filter(
         (invoice) =>
-          invoice.invoiceNumber
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+          invoice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.client.name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
     [invoices, searchTerm]
   );
@@ -80,78 +35,85 @@ export function AllInvoices() {
     setSearchTerm(e.target.value);
   }, []);
 
-  const handleView = useCallback((id: number) => {
-    console.log("View invoice:", id);
+  const handleSearchReset = useCallback(() => {
+    setSearchTerm("");
   }, []);
 
-  const handleEdit = useCallback((id: number) => {
-    console.log("Edit invoice:", id);
-  }, []);
-
-  const handleDelete = useCallback((id: number) => {
-    setInvoices((prevInvoices) =>
-      prevInvoices.filter((invoice) => invoice.id !== id)
-    );
-  }, []);
-
-  const getStatusColor = (status: Invoice["status"]) => {
-    switch (status) {
-      case "Paid":
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "paid":
         return "bg-green-100 text-green-800";
-      case "Unpaid":
+      case "pending":
         return "bg-yellow-100 text-yellow-800";
-      case "Overdue":
+      case "overdue":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
+  const handleDelete = useCallback(async (invoiceId: string) => {
+    const result = await deleteInvoice(invoiceId);
+    if (result.success) {
+      setInvoices((prev) => prev.filter((invoice) => invoice.id !== invoiceId));
+      window.alert("Invoice deleted successfully");
+    } else {
+      window.alert(result.error || "Failed to delete invoice");
+    }
+  }, []);
+
   const columns: TableColumn<Invoice>[] = [
-    { header: "Invoice #", accessor: "invoiceNumber" as keyof Invoice },
-    { header: "Client Name", accessor: "clientName" as keyof Invoice },
-    { header: "Amount", accessor: "amount" as keyof Invoice },
+    {
+      header: "Title",
+      accessor: "title",
+      sortable: true,
+    },
+    {
+      header: "Client",
+      accessor: "client",
+      sortable: true,
+      render: (invoice) => invoice.client.name,
+    },
+    {
+      header: "Amount",
+      accessor: "amount",
+      sortable: true,
+      render: (invoice) =>
+        new Intl.NumberFormat("en-NG", {
+          style: "currency",
+          currency: invoice.currency,
+        }).format(invoice.amount),
+    },
     {
       header: "Status",
-      accessor: (invoice: Invoice) => (
+      accessor: "status",
+      sortable: true,
+      render: (invoice) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
             invoice.status
           )}`}
         >
-          {invoice.status}
+          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
         </span>
       ),
     },
-    { header: "Date Created", accessor: "dateCreated" as keyof Invoice },
+    {
+      header: "Due Date",
+      accessor: "dueDate",
+      sortable: true,
+      render: (invoice) => new Date(invoice.dueDate).toLocaleDateString(),
+    },
+    {
+      header: "Actions",
+      accessor: (invoice) => (
+        <ActionButtons invoice={invoice} onDelete={handleDelete} />
+      ),
+      sortable: false,
+    },
   ];
-
-  const actionButtons = (invoice: Invoice) => (
-    <div className="flex space-x-1 xs:space-x-2">
-      <button
-        onClick={() => handleView(invoice.id)}
-        className="text-blue-600 hover:text-blue-800"
-      >
-        <Eye className="size-4 xs:size-5" />
-      </button>
-      <button
-        onClick={() => handleEdit(invoice.id)}
-        className="text-yellow-600 hover:text-yellow-800"
-      >
-        <Edit2 className="size-4 xs:size-5" />
-      </button>
-      <button
-        onClick={() => handleDelete(invoice.id)}
-        className="text-red-600 hover:text-red-800"
-      >
-        <Trash2 className="size-4 xs:size-5" />
-      </button>
-    </div>
-  );
-
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">
@@ -163,24 +125,26 @@ export function AllInvoices() {
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 sm:h-5 w-4 sm:w-5" />
         <input
           type="text"
-          placeholder="Search by invoice number or client name..."
+          placeholder="Search by invoice title or client name..."
           className="w-full pl-10 pr-4 py-2 text-sm xs:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           value={searchTerm}
           onChange={handleSearch}
         />
       </div>
 
-      {/* Invoices Table */}
-      <Table
-        data={filteredInvoices()}
-        columns={columns}
-        actions={actionButtons}
-      />
+      {filteredInvoices().length === 0 ? (
+        <NoSearchResults
+          value="invoices"
+          searchTerm={searchTerm}
+          onReset={handleSearchReset}
+        />
+      ) : (
+        <Table data={filteredInvoices()} columns={columns} itemsPerPage={10} />
+      )}
     </div>
   );
 }

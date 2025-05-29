@@ -42,7 +42,7 @@ export async function createInvoice(data: InvoiceFormData) {
       },
     });
 
-    revalidatePath("/dashboard/clients");
+    revalidatePath("/dashboard/invoices");
     revalidatePath("/dashboard");
     return { success: true, invoice };
   } catch (error) {
@@ -50,6 +50,68 @@ export async function createInvoice(data: InvoiceFormData) {
     return {
       success: false,
       error: "Failed to create invoice. Please try again.",
+    };
+  }
+}
+
+export async function getInvoices() {
+  try {
+    const session = await getAuthSession();
+
+    if (!session?.user) throw new Error("User not authenticated");
+
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        items: true,
+        client: true,
+      },
+      orderBy: {
+        invoiceDate: "desc",
+      },
+    });
+
+    return { success: true, invoices };
+  } catch (error) {
+    console.error("Failed to fetch invoices:", error);
+    return {
+      success: false,
+      error: "Failed to fetch invoices. Please try again.",
+    };
+  }
+}
+
+export async function deleteInvoice(invoiceId: string) {
+  try {
+    const session = await getAuthSession();
+
+    if (!session?.user) throw new Error("User not authenticated");
+
+    // Delete all invoice items first
+    await prisma.invoiceItem.deleteMany({
+      where: {
+        invoiceId: invoiceId,
+      },
+    });
+
+    // Then delete the invoice
+    await prisma.invoice.delete({
+      where: {
+        id: invoiceId,
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath("/dashboard/invoices");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete invoice:", error);
+    return {
+      success: false,
+      error: "Failed to delete invoice. Please try again.",
     };
   }
 }

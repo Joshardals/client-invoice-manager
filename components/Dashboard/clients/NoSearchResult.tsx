@@ -2,11 +2,16 @@ import { SearchX } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface NoSearchResultsProps {
+  value: "clients" | "invoices";
   searchTerm: string;
   onReset: () => void;
 }
 
-export function NoSearchResults({ searchTerm, onReset }: NoSearchResultsProps) {
+export function NoSearchResults({
+  value,
+  searchTerm,
+  onReset,
+}: NoSearchResultsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,7 +31,7 @@ export function NoSearchResults({ searchTerm, onReset }: NoSearchResultsProps) {
         No Results Found
       </h3>
       <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-        No clients found matching "
+        No {value} found matching "
         <span className="font-medium">{searchTerm}</span>"
         <br />
         Try adjusting your search terms or clear the search.

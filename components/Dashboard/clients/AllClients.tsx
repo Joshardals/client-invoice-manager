@@ -1,9 +1,13 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import Table from "@/components/ui/Table";
+import Table, { TableColumn } from "@/components/ui/Table";
 import { ActionButtons } from "./ActionButtons";
 import { Client } from "@/typings";
-import { deleteClient, updateClient } from "@/app/actions/client.action";
+import {
+  deleteClient,
+  forceDeleteClientWithInvoices,
+  updateClient,
+} from "@/app/actions/client.action";
 import { ClientFormData } from "@/lib/form/validation";
 import { EditModal } from "./EditModal";
 import { EmptyState } from "./EmptyState";
@@ -16,11 +20,6 @@ interface AllClientsProps {
     clients?: Client[];
     error?: string;
   };
-}
-
-interface TableColumn<T> {
-  header: string;
-  accessor: keyof T | ((item: T) => React.ReactNode);
 }
 
 export function AllClients({ allClients }: AllClientsProps) {
@@ -62,9 +61,26 @@ export function AllClients({ allClients }: AllClientsProps) {
 
   const handleDelete = useCallback(async (clientId: string) => {
     const result = await deleteClient(clientId);
+
     if (result.success) {
       setClients((prev) => prev.filter((client) => client.id !== clientId));
       window.alert("Client deleted successfully");
+    } else if (result.error === "HAS_INVOICES") {
+      const confirmForceDelete = window.confirm(
+        `This client has ${result.invoiceCount} invoice(s). Deleting this client will also delete all associated invoices. Are you sure you want to proceed?`
+      );
+
+      if (confirmForceDelete) {
+        const forceResult = await forceDeleteClientWithInvoices(clientId);
+        if (forceResult.success) {
+          setClients((prev) => prev.filter((client) => client.id !== clientId));
+          window.alert(
+            "Client and all associated invoices deleted successfully"
+          );
+        } else {
+          window.alert(forceResult.error || "Failed to delete client");
+        }
+      }
     } else {
       window.alert(result.error || "Failed to delete client");
     }
@@ -95,10 +111,28 @@ export function AllClients({ allClients }: AllClientsProps) {
   );
 
   const columns: TableColumn<Client>[] = [
-    { header: "Full Name", accessor: "name" as keyof Client },
-    { header: "Email", accessor: "email" as keyof Client },
-    { header: "Phone", accessor: "phone" as keyof Client },
-    { header: "Company", accessor: "company" as keyof Client },
+    {
+      header: "Full Name",
+      accessor: "name",
+      sortable: true,
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      sortable: true,
+    },
+    {
+      header: "Phone",
+      accessor: "phone",
+      sortable: true,
+      render: (client) => client.phone || "-",
+    },
+    {
+      header: "Company",
+      accessor: "company",
+      sortable: true,
+      render: (client) => client.company || "-",
+    },
     {
       header: "Actions",
       accessor: (client: Client) => (
@@ -109,6 +143,7 @@ export function AllClients({ allClients }: AllClientsProps) {
           onUpdate={handleUpdate}
         />
       ),
+      sortable: false,
     },
   ];
 
@@ -133,7 +168,11 @@ export function AllClients({ allClients }: AllClientsProps) {
       <SearchBar value={searchTerm} onChange={handleSearch} />
 
       {filteredClients().length === 0 ? (
-        <NoSearchResults searchTerm={searchTerm} onReset={handleSearchReset} />
+        <NoSearchResults
+          value="clients"
+          searchTerm={searchTerm}
+          onReset={handleSearchReset}
+        />
       ) : (
         <Table data={filteredClients()} columns={columns} itemsPerPage={10} />
       )}

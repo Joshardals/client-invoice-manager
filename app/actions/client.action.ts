@@ -90,9 +90,34 @@ export async function updateClient(clientId: string, data: ClientFormData) {
 export async function deleteClient(clientId: string) {
   try {
     const session = await getAuthSession();
-
     if (!session?.user) throw new Error("User not authenticated");
 
+    // First check if client has any invoices
+    const clientWithInvoices = await prisma.client.findFirst({
+      where: {
+        id: clientId,
+        userId: session.user.id,
+      },
+      include: {
+        _count: {
+          select: { invoices: true },
+        },
+      },
+    });
+
+    if (!clientWithInvoices) {
+      throw new Error("Client not found");
+    }
+
+    if (clientWithInvoices._count.invoices > 0) {
+      return {
+        success: false,
+        error: "HAS_INVOICES",
+        invoiceCount: clientWithInvoices._count.invoices,
+      };
+    }
+
+    // If no invoices, proceed with deletion
     await prisma.client.delete({
       where: {
         id: clientId,
@@ -106,6 +131,51 @@ export async function deleteClient(clientId: string) {
     return {
       success: false,
       error: "Failed to delete client. Please try again.",
+    };
+  }
+}
+
+// Force delete with all related invoices
+export async function forceDeleteClientWithInvoices(clientId: string) {
+  try {
+    const session = await getAuthSession();
+    if (!session?.user) throw new Error("User not authenticated");
+
+    // Delete in transaction to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      // First delete all invoice items
+      await tx.invoiceItem.deleteMany({
+        where: {
+          invoice: {
+            clientId: clientId,
+            userId: session.user.id,
+          },
+        },
+      });
+
+      // Then delete all invoices
+      await tx.invoice.deleteMany({
+        where: {
+          clientId: clientId,
+          userId: session.user.id,
+        },
+      });
+
+      // Finally delete the client
+      await tx.client.delete({
+        where: {
+          id: clientId,
+          userId: session.user.id,
+        },
+      });
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete client and invoices:", error);
+    return {
+      success: false,
+      error: "Failed to delete client and related invoices. Please try again.",
     };
   }
 }

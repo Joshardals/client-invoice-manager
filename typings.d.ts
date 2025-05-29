@@ -81,3 +81,35 @@ export interface Client {
   address?: string | null;
   notes?: string | null;
 }
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  total: number;
+  invoiceId: string;
+}
+
+export interface Invoice {
+  id: string;
+  title: string;
+  description: string | null;
+  amount: number;
+  currency: "NGN" | "USD" | "GBP" | "EUR";
+  status: "pending" | "paid" | "overdue" | "cancelled";
+  dueDate: Date;
+  invoiceDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  clientId: string;
+
+  items: InvoiceItem[];
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    company?: string | null;
+  };
+}

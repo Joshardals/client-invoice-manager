@@ -96,8 +96,8 @@ export interface Invoice {
   title: string;
   description: string | null;
   amount: number;
-  currency: "NGN" | "USD" | "GBP" | "EUR";
-  status: "pending" | "paid" | "overdue" | "cancelled";
+  currency: string;
+  status: string;
   dueDate: Date;
   invoiceDate: Date;
   createdAt: Date;

@@ -3,6 +3,7 @@ import { Eye, Edit2, Trash2, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { Invoice } from "@/typings";
+import { ViewModal } from "./ViewModal";
 
 interface ActionButtonsProps {
   invoice: Invoice;
@@ -89,9 +90,10 @@ DeleteDialog.displayName = "DeleteDialog";
 
 export function ActionButtons({ invoice, onDelete }: ActionButtonsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useLockBodyScroll(deleteDialogOpen);
+  useLockBodyScroll(viewModalOpen || deleteDialogOpen);
 
   const handleDelete = useCallback(async () => {
     if (onDelete) {
@@ -107,12 +109,16 @@ export function ActionButtons({ invoice, onDelete }: ActionButtonsProps) {
     }
   }, [invoice.id, onDelete]);
 
+  const closeViewModal = useCallback(() => setViewModalOpen(false), []);
   const closeDeleteDialog = useCallback(() => setDeleteDialogOpen(false), []);
 
   return (
     <>
       <div className="flex space-x-2 *:cursor-pointer">
-        <button className="text-blue-600 hover:text-blue-800">
+        <button
+          className="text-blue-600 hover:text-blue-800"
+          onClick={() => setViewModalOpen(true)}
+        >
           <Eye className="h-4 w-4 xs:h-5 xs:w-5" />
         </button>
         <button className="text-yellow-600 hover:text-yellow-800">
@@ -125,6 +131,12 @@ export function ActionButtons({ invoice, onDelete }: ActionButtonsProps) {
           <Trash2 className="h-4 w-4 xs:h-5 xs:w-5" />
         </button>
       </div>
+
+      <AnimatePresence>
+        {viewModalOpen && (
+          <ViewModal invoice={invoice} onClose={closeViewModal} />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {deleteDialogOpen && (

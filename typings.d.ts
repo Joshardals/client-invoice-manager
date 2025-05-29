@@ -104,12 +104,6 @@ export interface Invoice {
   updatedAt: Date;
   userId: string;
   clientId: string;
-
+  client: Client;
   items: InvoiceItem[];
-  client: {
-    id: string;
-    name: string;
-    email: string;
-    company?: string | null;
-  };
 }

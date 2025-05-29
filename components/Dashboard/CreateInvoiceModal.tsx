@@ -1,12 +1,7 @@
 "use client";
 import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  useForm,
-  useFieldArray,
-  SubmitHandler,
-  useWatch,
-} from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   X,
@@ -22,19 +17,16 @@ import {
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 import { InvoiceFormData, invoiceSchema } from "@/lib/form/validation";
-import { InvoiceData } from "@/typings";
 import SelectField from "../ui/SelectField";
 import { InvoiceSummary } from "./invoiceSummary";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { createInvoice } from "@/app/actions/invoice.action";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { VirtualizedSelect } from "./VirtualizedSelect";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // onSubmit: (data: InvoiceData) => void;
   clients: Array<{
     id: string;
     name: string;

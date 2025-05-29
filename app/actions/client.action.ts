@@ -44,8 +44,12 @@ export async function getClients() {
       where: {
         userId: session.user.id,
       },
+      include: {
+        invoices: true,
+      },
     });
 
+    console.log("fetchhed clients:", clients);
     return { success: true, clients };
   } catch (error) {
     console.error("Failed to fetch clients:", error);

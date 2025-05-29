@@ -22,7 +22,7 @@ export async function createInvoice(data: InvoiceFormData) {
         description: data.description || null,
         amount: totalAmount,
         currency: data.currency,
-        status: "pending", // Default status for new invoices
+        status: "PENDING", // Default status
         dueDate: new Date(data.dueDate + "T00:00:00.000Z"),
         invoiceDate: new Date(data.invoiceDate + "T00:00:00.000Z"),
         userId: session.user.id,
@@ -79,6 +79,61 @@ export async function getInvoices() {
     return {
       success: false,
       error: "Failed to fetch invoices. Please try again.",
+    };
+  }
+}
+
+export async function updateInvoice(invoiceId: string, data: InvoiceFormData) {
+  try {
+    const session = await getAuthSession();
+
+    if (!session?.user) throw new Error("User not authenticated");
+
+    // Calculate total amount from items
+    const totalAmount = data.items.reduce(
+      (sum, item) => sum + item.quantity * item.rate,
+      0
+    );
+
+    const invoice = await prisma.invoice.update({
+      where: {
+        id: invoiceId,
+        userId: session.user.id,
+      },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        amount: totalAmount,
+        currency: data.currency,
+        dueDate: new Date(data.dueDate + "T00:00:00.000Z"),
+        invoiceDate: new Date(data.invoiceDate + "T00:00:00.000Z"),
+        status: data.status,
+        clientId: data.clientId,
+        // First delete existing items then create new ones
+        items: {
+          deleteMany: {}, // This deletes all existing items
+          create: data.items.map((item) => ({
+            description: item.description,
+            quantity: item.quantity,
+            rate: item.rate,
+            total: item.quantity * item.rate,
+          })),
+        },
+      },
+      include: {
+        items: true,
+        client: true,
+      },
+    });
+
+    revalidatePath("/dashboard/invoices");
+    revalidatePath("/dashboard");
+    return { success: true, invoice };
+  } catch (error) {
+    console.error("Failed to update invoice:", error);
+    return {
+      success: false,
+      error: "Failed to update invoice. Please try again.",
     };
   }
 }

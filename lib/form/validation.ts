@@ -125,6 +125,7 @@ export const invoiceSchema = z
     invoiceDate: z.string(),
     dueDate: z.string(),
     currency: z.enum(["NGN", "USD", "GBP", "EUR"]),
+    status: z.enum(["PENDING", "PAID", "OVERDUE"]).optional(),
     clientId: z.string().min(1, "Please select a client"),
     description: z.string().optional(),
     items: z.array(invoiceItemSchema).min(1, "Add at least one item"),

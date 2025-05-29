@@ -7,12 +7,7 @@ import {
   Clock,
   Building2,
   Phone,
-  MapPin,
-  FileText,
   Mail,
-  CheckCircle2,
-  AlertCircle,
-  Clock4,
   Receipt,
   LucideIcon,
   DollarSign,
@@ -137,7 +132,7 @@ export function ViewModal({ invoice, onClose }: ViewModalProps) {
           <div className="relative px-6 pt-6">
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="absolute right-4 top-4 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             >
               <X className="size-5 text-gray-500" />
             </button>

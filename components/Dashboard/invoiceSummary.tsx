@@ -28,9 +28,16 @@ interface InvoiceFormData {
 interface InvoiceSummaryProps {
   invoiceData: InvoiceFormData;
   clients: Client[];
+  textColor?: string;
+  backgroundColor?: string;
 }
 
-export function InvoiceSummary({ invoiceData, clients }: InvoiceSummaryProps) {
+export function InvoiceSummary({
+  invoiceData,
+  clients,
+  textColor = "text-purple-600",
+  backgroundColor = "bg-purple-100",
+}: InvoiceSummaryProps) {
   const selectedClient = clients.find(
     (client) => client.id === invoiceData?.clientId
   );
@@ -63,6 +70,7 @@ export function InvoiceSummary({ invoiceData, clients }: InvoiceSummaryProps) {
       {
         header: "Description",
         accessor: "description" as keyof InvoiceItem,
+        sortable: false,
       },
       {
         header: "Quantity",
@@ -91,8 +99,8 @@ export function InvoiceSummary({ invoiceData, clients }: InvoiceSummaryProps) {
         {/* Header */}
         <div className="border-b border-gray-200 p-4 sm:p-6">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="bg-purple-100 p-2 sm:p-3 rounded-lg">
-              <Receipt className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+            <div className={`${backgroundColor} p-2 sm:p-3 rounded-lg`}>
+              <Receipt className={`w-5 h-5 sm:w-6 sm:h-6 ${textColor}`} />
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-900">

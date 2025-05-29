@@ -80,6 +80,7 @@ export interface Client {
   company?: string | null;
   address?: string | null;
   notes?: string | null;
+  invoices?: Invoice[];
 }
 
 export interface InvoiceItem {

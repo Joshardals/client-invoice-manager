@@ -14,7 +14,7 @@ import { EmptyState } from "./EmptyState";
 import { NoSearchResults } from "./NoSearchResult";
 import { SearchBar } from "./SearchBar";
 
-interface AllClientsProps {
+export interface AllClientsProps {
   allClients: {
     success: boolean;
     clients?: Client[];

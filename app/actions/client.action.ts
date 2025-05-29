@@ -45,7 +45,12 @@ export async function getClients() {
         userId: session.user.id,
       },
       include: {
-        invoices: true,
+        invoices: {
+          include: {
+            client: true,
+            items: true,
+          },
+        },
       },
     });
 

@@ -228,7 +228,7 @@ export default function Table<T extends { id?: number | string }>({
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 ">
             {getPaginatedData().map((item, rowIndex) => (
               <motion.tr
                 key={item.id || rowIndex}

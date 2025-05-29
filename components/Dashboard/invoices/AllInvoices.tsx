@@ -1,8 +1,8 @@
 "use client";
 import React, { useCallback, useState } from "react";
-import { Eye, Edit2, Trash2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Table, { TableColumn } from "@/components/ui/Table";
-import { Invoice } from "@/typings";
+import { Client, Invoice } from "@/typings";
 import { NoSearchResults } from "../clients/NoSearchResult";
 import { deleteInvoice } from "@/app/actions/invoice.action";
 import { ActionButtons } from "./ActionButtons";
@@ -13,10 +13,17 @@ interface AllInvoicesProps {
     invoices?: Invoice[];
     error?: string;
   };
+  allClients: {
+    success: boolean;
+    clients?: Client[];
+    error?: string;
+  };
 }
 
-export function AllInvoices({ allInvoices }: AllInvoicesProps) {
+export function AllInvoices({ allInvoices, allClients }: AllInvoicesProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [clients] = useState<Client[]>(allClients.clients || []);
+
   const [invoices, setInvoices] = useState<Invoice[]>(
     allInvoices.invoices || []
   );
@@ -107,7 +114,11 @@ export function AllInvoices({ allInvoices }: AllInvoicesProps) {
     {
       header: "Actions",
       accessor: (invoice) => (
-        <ActionButtons invoice={invoice} onDelete={handleDelete} />
+        <ActionButtons
+          invoice={invoice}
+          clients={clients}
+          onDelete={handleDelete}
+        />
       ),
       sortable: false,
     },

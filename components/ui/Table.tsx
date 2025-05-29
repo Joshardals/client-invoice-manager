@@ -27,6 +27,12 @@ interface TableProps<T> {
 
 type SortOrder = "asc" | "desc" | null;
 
+const STATUS_PRIORITY: Record<string, number> = {
+  PAID: 1,
+  PENDING: 2,
+  OVERDUE: 3,
+};
+
 export default function Table<T extends { id?: number | string }>({
   data,
   columns,
@@ -69,7 +75,20 @@ export default function Table<T extends { id?: number | string }>({
       const aValue = a[sortConfig.key!];
       const bValue = b[sortConfig.key!];
 
-      // Convert values to comparable strings
+      // Special handling for status sorting
+      if (sortConfig.key === "status") {
+        const statusA = String(aValue).toUpperCase();
+        const statusB = String(bValue).toUpperCase();
+
+        const priorityA = STATUS_PRIORITY[statusA] || 999;
+        const priorityB = STATUS_PRIORITY[statusB] || 999;
+
+        return sortConfig.order === "asc"
+          ? priorityA - priorityB
+          : priorityB - priorityA;
+      }
+
+      // Default string comparison for other fields
       const compareA = convertToString(aValue);
       const compareB = convertToString(bValue);
 
@@ -78,7 +97,6 @@ export default function Table<T extends { id?: number | string }>({
         : compareB.localeCompare(compareA);
     });
   };
-
   const convertToString = <T extends unknown>(value: T): string => {
     if (value === null || value === undefined) {
       return "";

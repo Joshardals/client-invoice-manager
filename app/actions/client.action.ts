@@ -54,7 +54,6 @@ export async function getClients() {
       },
     });
 
-    console.log("fetchhed clients:", clients);
     return { success: true, clients };
   } catch (error) {
     console.error("Failed to fetch clients:", error);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,11 +39,8 @@ export function EditModal({
   clients,
   loadingClients,
 }: EditModalProps) {
-  useLockBodyScroll(isOpen);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
-  console.log(invoice.status);
 
   const defaultValues: InvoiceFormData = {
     title: invoice.title,
@@ -154,7 +151,6 @@ export function EditModal({
         const result = await updateInvoice(invoice.id, data);
 
         if (result.success) {
-          reset();
           setCurrentStep(1);
           onClose();
           window.alert("Invoice updated successfully");
@@ -168,7 +164,7 @@ export function EditModal({
         setIsLoading(false);
       }
     },
-    [invoice.id, onClose, reset]
+    [invoice.id, onClose]
   );
 
   const handleFinalSubmit = async () => {

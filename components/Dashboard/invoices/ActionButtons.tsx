@@ -41,6 +41,7 @@ export function ActionButtons({
 
   const closeViewModal = useCallback(() => setViewModalOpen(false), []);
   const closeDeleteDialog = useCallback(() => setDeleteDialogOpen(false), []);
+  const closeEditModal = useCallback(() => setEditModalOpen(false), []);
 
   return (
     <>
@@ -75,7 +76,7 @@ export function ActionButtons({
         <EditModal
           invoice={invoice}
           isOpen={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
+          onClose={closeEditModal}
           clients={clients}
         />
       )}

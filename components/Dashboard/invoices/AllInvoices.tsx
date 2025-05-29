@@ -124,7 +124,7 @@ export function AllInvoices({ allInvoices, allClients }: AllInvoicesProps) {
     },
   ];
   return (
-    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 min-h-[200vh]">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">

@@ -16,7 +16,7 @@ import { ClientFormData, clientSchema } from "@/lib/form/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "react-international-phone";
-import { isPhoneValid } from "@/lib/utils";
+import { capitalizeWords, isPhoneValid } from "@/lib/utils";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import "react-international-phone/style.css";
 import { Client } from "@/typings";
@@ -81,7 +81,7 @@ export function EditModal({
       try {
         const cleanedData = {
           ...data,
-          fullName: data.fullName.trim().replace(/\s+/g, " "),
+          fullName: capitalizeWords(data.fullName.trim().replace(/\s+/g, " ")),
           email: data.email.trim().toLowerCase(),
           phone:
             data.phone &&
@@ -89,8 +89,10 @@ export function EditModal({
             data.phone.match(/^\+\d{1,3}$/)
               ? ""
               : data.phone,
-          company: data.company?.trim().replace(/\s+/g, " ") || "",
-          address: data.address?.trim().replace(/\s+/g, " ") || "",
+          company: data.company
+            ? capitalizeWords(data.company.trim().replace(/\s+/g, " "))
+            : "",
+          address: data.address ? data.address.trim().replace(/\s+/g, " ") : "",
           notes: data.notes?.trim().replace(/\s+/g, " ") || "",
         };
 

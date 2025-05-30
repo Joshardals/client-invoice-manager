@@ -18,11 +18,11 @@ import Button from "@/components/ui/Button";
 import { InvoiceFormData, invoiceSchema } from "@/lib/form/validation";
 import SelectField from "@/components/ui/SelectField";
 import { Label } from "@/components/ui/Label";
-import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { updateInvoice } from "@/app/actions/invoice.action";
 import { Invoice } from "@/typings";
 import { InvoiceSummary } from "../invoiceSummary";
 import { VirtualizedSelect } from "../VirtualizedSelect";
+import { toTitleCase } from "@/lib/utils";
 
 interface EditModalProps {
   invoice: Invoice;
@@ -148,7 +148,31 @@ export function EditModal({
     async (data: InvoiceFormData) => {
       setIsLoading(true);
       try {
-        const result = await updateInvoice(invoice.id, data);
+        const cleanedData: InvoiceFormData = {
+          ...data,
+          title: toTitleCase(data.title.trim().replace(/\s+/g, " ")),
+          description: data.description
+            ? data.description
+                .trim()
+                .replace(/\s+/g, " ")
+                .charAt(0)
+                .toUpperCase() +
+              data.description.trim().replace(/\s+/g, " ").slice(1)
+            : "",
+
+          items: data.items.map((item) => ({
+            ...item,
+            description:
+              item.description
+                .trim()
+                .replace(/\s+/g, " ")
+                .charAt(0)
+                .toUpperCase() +
+              item.description.trim().replace(/\s+/g, " ").slice(1),
+          })),
+        };
+
+        const result = await updateInvoice(invoice.id, cleanedData);
 
         if (result.success) {
           setCurrentStep(1);

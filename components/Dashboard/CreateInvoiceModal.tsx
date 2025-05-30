@@ -23,6 +23,8 @@ import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { createInvoice } from "@/app/actions/invoice.action";
 import { VirtualizedSelect } from "./VirtualizedSelect";
+import { useRouter } from "next/navigation";
+import { toTitleCase } from "@/lib/utils";
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ export function CreateInvoiceModal({
   useLockBodyScroll(isOpen);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const defaultValues: InvoiceFormData = {
     title: "",
@@ -151,16 +154,47 @@ export function CreateInvoiceModal({
     async (data: InvoiceFormData) => {
       setIsLoading(true);
       try {
-        const result = await createInvoice(data);
+        const cleanedData: InvoiceFormData = {
+          ...data,
+          title: toTitleCase(data.title.trim().replace(/\s+/g, " ")),
+          description: data.description
+            ? data.description
+                .trim()
+                .replace(/\s+/g, " ")
+                .charAt(0)
+                .toUpperCase() +
+              data.description.trim().replace(/\s+/g, " ").slice(1)
+            : "",
+
+          items: data.items.map((item) => ({
+            ...item,
+            description:
+              item.description
+                .trim()
+                .replace(/\s+/g, " ")
+                .charAt(0)
+                .toUpperCase() +
+              item.description.trim().replace(/\s+/g, " ").slice(1),
+          })),
+        };
+
+        const result = await createInvoice(cleanedData);
 
         if (result.success) {
           reset();
           setCurrentStep(1);
           onClose();
+
+          // Force a refresh to update the UI
+          router.refresh();
+
+          // Additional refresh after a short delay
+          setTimeout(() => {
+            router.refresh();
+          }, 100);
+
           window.alert("Invoice created successfully");
-          // toast.success("Invoice created successfully");
         } else {
-          // Handle error
           window.alert(result.error || "Failed to create invoice");
         }
       } catch (error) {
@@ -170,7 +204,7 @@ export function CreateInvoiceModal({
         setIsLoading(false);
       }
     },
-    [onClose, reset]
+    [onClose, reset, router]
   );
 
   const handleFinalSubmit = async () => {

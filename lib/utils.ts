@@ -50,3 +50,49 @@ export const isPhoneValid = (phone: string) => {
     return false;
   }
 };
+
+// Helper function for title case (good for titles, product names, etc.)
+export const toTitleCase = (str: string): string => {
+  return (
+    str
+      .split(" ")
+      .map((word) => {
+        // List of words to keep lowercase
+        const minorWords = [
+          "and",
+          "or",
+          "but",
+          "nor",
+          "yet",
+          "so",
+          "at",
+          "by",
+          "for",
+          "in",
+          "of",
+          "on",
+          "to",
+          "up",
+          "as",
+        ];
+
+        // Always capitalize first and last words
+        if (word.length === 0) return "";
+
+        return minorWords.includes(word.toLowerCase())
+          ? word.toLowerCase()
+          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(" ")
+      // Ensure first word is always capitalized
+      .replace(/^\w/, (c) => c.toUpperCase())
+  );
+};
+
+// Helper function to capitalize each word in a string
+export const capitalizeWords = (str: string): string => {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};

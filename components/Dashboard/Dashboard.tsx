@@ -6,11 +6,10 @@ import {
   FileText,
   DollarSign,
   CheckCircle,
-  PlusCircle,
   FilePlus,
   FileSearch,
   Bell,
-  LucideIcon,
+  UserPlus,
 } from "lucide-react";
 import Table from "../ui/Table";
 import { today } from "@/lib/utils";
@@ -18,117 +17,95 @@ import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
 import { useAddClientModal } from "@/lib/stores/useAddClientModal";
 import { useCreateInvoiceModal } from "@/lib/stores/useCreateInvoiceModal";
+import { Invoice } from "@/typings";
+import { DashboardStats } from "@/app/dashboard/page";
 
-interface Invoice {
-  id: number;
-  client: string;
-  amount: string;
-  status: "Paid" | "Unpaid";
-  date: string;
+
+interface DashboardProps {
+  name: string;
+  recentInvoices: Invoice[];
+  stats: DashboardStats;
 }
 
-interface StatCard {
-  title: string;
-  value: string;
-  icon: LucideIcon;
-  color: string;
-}
+const formatCurrency = (amount: number, currency: string = "NGN") => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
 
-export function Dashboard() {
+export function Dashboard({ name, recentInvoices, stats }: DashboardProps) {
   const router = useRouter();
   const { open: openClientModal } = useAddClientModal();
   const { open: openInvoiceModal } = useCreateInvoiceModal();
 
-  const stats: StatCard[] = useMemo(
+  const statCards = useMemo(
     () => [
       {
         title: "Total Clients",
-        value: "24",
+        value: stats.totalClients.toString(),
         icon: Users,
         color: "bg-blue-500",
       },
       {
         title: "Total Invoices",
-        value: "156",
+        value: stats.totalInvoices.toString(),
         icon: FileText,
         color: "bg-purple-500",
       },
       {
         title: "Pending Payments",
-        value: "₦450,000",
+        value: formatCurrency(stats.pendingAmount),
         icon: DollarSign,
         color: "bg-yellow-500",
       },
       {
         title: "Paid Invoices",
-        value: "₦1,250,000",
+        value: formatCurrency(stats.paidAmount),
         icon: CheckCircle,
         color: "bg-green-500",
       },
     ],
-    []
-  );
-
-  const recentInvoices: Invoice[] = useMemo(
-    () => [
-      {
-        id: 1,
-        client: "Apex Solutions",
-        amount: "₦150,000",
-        status: "Paid",
-        date: "2025-05-10",
-      },
-      {
-        id: 2,
-        client: "Global Tech",
-        amount: "₦80,000",
-        status: "Unpaid",
-        date: "2025-05-08",
-      },
-      {
-        id: 3,
-        client: "Metro Systems",
-        amount: "₦200,000",
-        status: "Paid",
-        date: "2025-05-05",
-      },
-      {
-        id: 4,
-        client: "Delta Corp",
-        amount: "₦120,000",
-        status: "Unpaid",
-        date: "2025-05-03",
-      },
-      {
-        id: 5,
-        client: "Echo Industries",
-        amount: "₦90,000",
-        status: "Paid",
-        date: "2025-05-01",
-      },
-    ],
-    []
+    [stats]
   );
 
   const columns = useMemo(
     () => [
-      { header: "Client", accessor: "client" as keyof Invoice },
-      { header: "Amount", accessor: "amount" as keyof Invoice },
+      {
+        header: "Client",
+        accessor: (invoice: Invoice) => invoice.client.name,
+      },
+      {
+        header: "Amount",
+        accessor: (invoice: Invoice) =>
+          new Intl.NumberFormat("en-NG", {
+            style: "currency",
+            currency: invoice.currency,
+          }).format(invoice.amount),
+      },
       {
         header: "Status",
         accessor: (invoice: Invoice) => (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${
-              invoice.status === "Paid"
+              invoice.status === "PAID"
                 ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
+                : invoice.status === "PENDING"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-red-100 text-red-800"
             }`}
           >
             {invoice.status}
           </span>
         ),
       },
-      { header: "Date", accessor: "date" as keyof Invoice },
+      {
+        header: "Date",
+        accessor: (invoice: Invoice) =>
+          new Date(invoice.createdAt).toLocaleDateString(),
+      },
     ],
     []
   );
@@ -149,7 +126,7 @@ export function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl xs:text-2xl lg:text-3xl font-bold text-gray-900">
-              Welcome back, Joshua
+              Welcome back, {name}
             </h1>
 
             <p className="mt-1 text-xs xs:text-sm text-gray-600">{today}</p>
@@ -158,7 +135,7 @@ export function Dashboard() {
           {/* Quick Actions */}
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 sm:gap-3">
             <Button onClick={openClientModal} fullWidth={false}>
-              <PlusCircle className="w-4 h-4 mr-1.5 sm:mr-2" />
+              <UserPlus className="w-4 h-4 mr-1.5 sm:mr-2" />
               Add Client
             </Button>
 
@@ -171,7 +148,7 @@ export function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}

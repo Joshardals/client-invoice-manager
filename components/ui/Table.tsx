@@ -97,6 +97,7 @@ export default function Table<T extends { id?: number | string }>({
         : compareB.localeCompare(compareA);
     });
   };
+
   const convertToString = <T extends unknown>(value: T): string => {
     if (value === null || value === undefined) {
       return "";

@@ -18,7 +18,7 @@ import Button from "../ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "react-international-phone";
-import { isPhoneValid } from "@/lib/utils";
+import { capitalizeWords, isPhoneValid } from "@/lib/utils";
 import { Label } from "../ui/Label";
 import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import "react-international-phone/style.css";
@@ -84,7 +84,7 @@ export function AddClientModal({
       try {
         const cleanedData = {
           ...data,
-          fullName: data.fullName.trim().replace(/\s+/g, " "),
+          fullName: capitalizeWords(data.fullName.trim().replace(/\s+/g, " ")),
           email: data.email.trim().toLowerCase(),
           phone:
             data.phone &&
@@ -92,8 +92,10 @@ export function AddClientModal({
             data.phone.match(/^\+\d{1,3}$/)
               ? ""
               : data.phone,
-          company: data.company?.trim().replace(/\s+/g, " ") || "",
-          address: data.address?.trim().replace(/\s+/g, " ") || "",
+          company: data.company
+            ? capitalizeWords(data.company.trim().replace(/\s+/g, " "))
+            : "",
+          address: data.address ? data.address.trim().replace(/\s+/g, " ") : "",
           notes: data.notes?.trim().replace(/\s+/g, " ") || "",
         };
 
@@ -105,12 +107,10 @@ export function AddClientModal({
           setCurrentStep(1);
           onClose();
 
-          // toast.success("Client added successfully");
-
           // Force a hard refresh
           router.refresh();
 
-          // Another refreshh to ensure the UI updates
+          // Another refresh to ensure the UI updates
           setTimeout(() => {
             router.refresh();
           }, 100);
@@ -127,7 +127,6 @@ export function AddClientModal({
     },
     [onSuccess, onClose, reset, router]
   );
-
   const handleFinalSubmit = async () => {
     const isValidStep = await trigger();
 

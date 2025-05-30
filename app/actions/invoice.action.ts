@@ -69,7 +69,7 @@ export async function getInvoices() {
         client: true,
       },
       orderBy: {
-        invoiceDate: "desc",
+        createdAt: "desc",
       },
     });
 
@@ -79,6 +79,99 @@ export async function getInvoices() {
     return {
       success: false,
       error: "Failed to fetch invoices. Please try again.",
+    };
+  }
+}
+
+export async function getDashboardStats() {
+  try {
+    const session = await getAuthSession();
+
+    if (!session?.user) throw new Error("User not authenticated");
+
+    // Get all clients count
+    const clientsCount = await prisma.client.count({
+      where: {
+        userId: session.user.id,
+      },
+    });
+
+    // Get all invoices with their amounts and status
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        amount: true,
+        status: true,
+        currency: true,
+      },
+    });
+
+    // Calculate stats
+    const stats = invoices.reduce(
+      (acc, inv) => {
+        acc.totalInvoices++;
+
+        if (inv.status === "PENDING") {
+          acc.pendingAmount += inv.amount;
+        } else if (inv.status === "PAID") {
+          acc.paidAmount += inv.amount;
+        }
+
+        return acc;
+      },
+      {
+        totalInvoices: 0,
+        pendingAmount: 0,
+        paidAmount: 0,
+      }
+    );
+
+    return {
+      success: true,
+      stats: {
+        totalClients: clientsCount,
+        totalInvoices: stats.totalInvoices,
+        pendingAmount: stats.pendingAmount,
+        paidAmount: stats.paidAmount,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch dashboard stats:", error);
+    return {
+      success: false,
+      error: "Failed to fetch dashboard stats. Please try again.",
+    };
+  }
+}
+
+export async function getRecentInvoices() {
+  try {
+    const session = await getAuthSession();
+
+    if (!session?.user) throw new Error("User not authenticated");
+
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        client: true,
+        items: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+    });
+
+    return { success: true, invoices };
+  } catch (error) {
+    console.error("Failed to fetch recent invoices:", error);
+    return {
+      success: false,
+      error: "Failed to fetch recent invoices. Please try again.",
     };
   }
 }

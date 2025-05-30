@@ -6,6 +6,7 @@ import { Client, Invoice } from "@/typings";
 import { NoSearchResults } from "../clients/NoSearchResult";
 import { deleteInvoice } from "@/app/actions/invoice.action";
 import { ActionButtons } from "./ActionButtons";
+import { EmptyState } from "./EmptyState";
 
 interface AllInvoicesProps {
   allInvoices: {
@@ -101,7 +102,7 @@ export function AllInvoices({ allInvoices, allClients }: AllInvoicesProps) {
             invoice.status
           )}`}
         >
-          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+          {invoice.status}
         </span>
       ),
     },
@@ -123,6 +124,11 @@ export function AllInvoices({ allInvoices, allClients }: AllInvoicesProps) {
       sortable: false,
     },
   ];
+
+  if (!invoices.length) {
+    return <EmptyState />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
